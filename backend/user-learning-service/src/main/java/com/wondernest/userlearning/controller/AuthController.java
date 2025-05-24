@@ -1,6 +1,7 @@
 package com.wondernest.userlearning.controller;
 
 import com.wondernest.userlearning.dto.RegisterRequest;
+import com.wondernest.userlearning.dto.LoginRequest;
 import com.wondernest.userlearning.model.Parent;
 import com.wondernest.userlearning.service.AuthService;
 import jakarta.validation.Valid;
@@ -29,5 +30,17 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            // Call the AuthService login method (we'll check this next)
+            var response = authService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
 

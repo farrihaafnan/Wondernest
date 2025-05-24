@@ -2,6 +2,7 @@ package com.wondernest.userlearning.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.UUID;
 
 @Data
 @Entity
