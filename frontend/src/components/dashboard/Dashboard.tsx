@@ -1,102 +1,73 @@
 import React from 'react';
-import {
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-} from '@mui/material';
-import {
-  Timeline as TimelineIcon,
-  School as SchoolIcon,
-  Assignment as AssignmentIcon,
-} from '@mui/icons-material';
+import { Box, CssBaseline, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, AppBar, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+
+
+
+
+const drawerWidth = 240;
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+
+  const menuItems = [
+    { text: 'Word Flashcards', path: '/wordflashcard' },
+    { text: 'Sentence Learning', path: '/sentence-learning' },
+    { text: 'Story Generation', path: '/story-generation' },
+    { text: 'Word Matching', path: '/word-matching' },
+    { text: 'Sentence Correction', path: '/sentence-correction' },
+    { text: 'Puzzle', path: '/puzzle' },
+  ];
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Grid container spacing={3}>
-        {/* Welcome Section */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h4" gutterBottom>
-              Welcome to Your Dashboard
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Track your progress and continue your learning journey
-            </Typography>
-          </Paper>
-        </Grid>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
 
-        {/* Stats Cards */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <TimelineIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
-                <Typography variant="h6">Progress</Typography>
-              </Box>
-              <Typography variant="h4">75%</Typography>
-              <Typography color="text.secondary">Overall Completion</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Top App Bar */}
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" noWrap component="div">
+            WonderNest
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <SchoolIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
-                <Typography variant="h6">Courses</Typography>
-              </Box>
-              <Typography variant="h4">3</Typography>
-              <Typography color="text.secondary">Active Courses</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Sidebar Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflow: 'auto' }}>
+          <List>
+            {menuItems.map((item) => (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton onClick={() => navigate(item.path)}>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
 
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <AssignmentIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
-                <Typography variant="h6">Assignments</Typography>
-              </Box>
-              <Typography variant="h4">5</Typography>
-              <Typography color="text.secondary">Pending Tasks</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Recent Activity */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Activity
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              No recent activity to display
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Recommended Courses */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" gutterBottom>
-              Recommended Courses
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              No recommendations available at the moment
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+      {/* Main content area */}
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
+      >
+        <Toolbar />
+        <Typography variant="h4" gutterBottom>
+          Welcome to Your Dashboard
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

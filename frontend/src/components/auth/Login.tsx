@@ -11,6 +11,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { South } from '@mui/icons-material';
 
 interface LoginFormData {
   email: string;
@@ -54,6 +55,7 @@ const Login: React.FC = () => {
       const data = await response.json();
       // TODO: Store token in localStorage or secure cookie
       localStorage.setItem('token', data.token);
+      
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid email or password');

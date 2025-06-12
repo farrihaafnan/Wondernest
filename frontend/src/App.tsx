@@ -7,6 +7,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
+import WordFlashcard from './components/wordflashcard/WordFlashcard';
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
+          <Route path="/wordflashcard" element={<WordFlashcard />} />
         </Routes>
       </Box>
     </Box>
