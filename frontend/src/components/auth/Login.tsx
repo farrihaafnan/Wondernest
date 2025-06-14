@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -11,7 +11,6 @@ import {
   Alert,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { South } from '@mui/icons-material';
 
 interface LoginFormData {
   email: string;
@@ -20,11 +19,20 @@ interface LoginFormData {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
   const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const message = params.get('message');
+    if (message) {
+      setError(message);
+    }
+  }, [location]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,8 +47,7 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      // TODO: Implement API call to login user
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:8081/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,10 +60,15 @@ const Login: React.FC = () => {
       }
 
       const data = await response.json();
-      // TODO: Store token in localStorage or secure cookie
+      // Store user data and token
+      localStorage.setItem('user', JSON.stringify({
+        id: data.id,
+        email: data.email,
+        children: data.children,
+      }));
       localStorage.setItem('token', data.token);
       
-      navigate('/dashboard');
+      navigate('/dashboard?message=Welcome back! You have successfully logged in.');
     } catch (err) {
       setError('Invalid email or password');
     }

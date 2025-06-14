@@ -6,10 +6,18 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  // TODO: Implement proper authentication check
-  const isAuthenticated = localStorage.getItem('token') !== null;
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
 
-  if (!isAuthenticated) {
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Simple token validation - in a real app, you'd verify the JWT token
+  const tokenParts = token.split('-');
+  if (tokenParts.length !== 3) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return <Navigate to="/login" replace />;
   }
 

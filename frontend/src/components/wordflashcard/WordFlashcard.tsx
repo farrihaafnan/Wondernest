@@ -34,11 +34,30 @@ const WordFlashcard: React.FC = () => {
   useEffect(() => {
     if (!selectedRange) return;
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login?message=Please login to access this feature';
+      return;
+    }
+
     setLoading(true);
     setError('');
-    fetch(`http://localhost:8081/api/words?range=${selectedRange}`)
+    
+    fetch(`http://localhost:8081/api/words?range=${selectedRange}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => {
-        if (!res.ok) throw new Error(`Error fetching words: ${res.statusText}`);
+        if (!res.ok) {
+          if (res.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login?message=Your session has expired. Please login again';
+            throw new Error('Session expired');
+          }
+          throw new Error(`Error fetching words: ${res.statusText}`);
+        }
         return res.json();
       })
       .then((data: WordImage[]) => {
