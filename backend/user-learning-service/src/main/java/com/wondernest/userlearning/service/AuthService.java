@@ -43,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -68,7 +70,7 @@ public class AuthService {
         return parentRepository.save(parent);
     }
 
-    public Parent login(LoginRequest request) {
+    public Map<String, Object> login(LoginRequest request) {
         Parent parent = parentRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
@@ -76,6 +78,12 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        return parent;
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", parent.getId());
+        response.put("email", parent.getEmail());
+        response.put("children", parent.getChildren());
+        response.put("token", "dummy-token-" + System.currentTimeMillis());
+        
+        return response;
     }
 }
