@@ -79,7 +79,11 @@ const Dashboard: React.FC = () => {
           <List>
             {menuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
-                <ListItemButton onClick={() => navigate(item.path)}>
+                <ListItemButton
+                  onClick={() =>
+                    navigate(item.path, { state: { parent: user, child: child } })
+                  }
+                >
                   <ListItemText primary={item.text} />
                 </ListItemButton>
               </ListItem>

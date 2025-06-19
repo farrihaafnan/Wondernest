@@ -9,6 +9,10 @@ import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
 import WordFlashcard from './components/wordflashcard/WordFlashcard';
 import SelectChild from './components/dashboard/SelectChild';
+import StoryGenerator from './components/pages/StoryGenerator';
+
+
+
 
 const App: React.FC = () => {
   return (
@@ -29,6 +33,7 @@ const App: React.FC = () => {
             }
           />
           <Route path="/wordflashcard" element={<WordFlashcard />} />
+          <Route path="/story-generation" element={<StoryGenerator />} />
         </Routes>
       </Box>
     </Box>
