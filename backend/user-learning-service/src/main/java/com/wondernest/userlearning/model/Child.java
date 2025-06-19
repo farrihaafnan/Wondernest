@@ -9,7 +9,7 @@ import java.util.UUID;
 @Table(name = "children")
 public class Child {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false)
@@ -18,13 +18,13 @@ public class Child {
     @Column(nullable = false)
     private Integer age;
 
+    @Column(nullable = false)
+    private String gender;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     @ManyToOne
     @JoinColumn(name = "parent_id", nullable = false)
     private Parent parent;
-
-    @Column(nullable = false)
-    private String grade;
-
-    @Column
-    private String interests;
-} 
+}

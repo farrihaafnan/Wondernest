@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Link,
-  Alert,
+  Container, Paper, Typography, TextField, Button, Box, Link, Alert,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -20,26 +13,22 @@ interface LoginFormData {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' });
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
+    // Always clear auth state when login page is visited
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+
     const params = new URLSearchParams(location.search);
     const message = params.get('message');
-    if (message) {
-      setError(message);
-    }
+    if (message) setError(message);
   }, [location]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,27 +38,18 @@ const Login: React.FC = () => {
     try {
       const response = await fetch('http://localhost:8081/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
+      if (!response.ok) throw new Error('Login failed');
 
       const data = await response.json();
-      // Store user data and token
-      localStorage.setItem('user', JSON.stringify({
-        id: data.id,
-        email: data.email,
-        children: data.children,
-      }));
+      localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('token', data.token);
-      
-      navigate('/dashboard?message=Welcome back! You have successfully logged in.');
-    } catch (err) {
+
+      navigate('/select-child');
+    } catch {
       setError('Invalid email or password');
     }
   };
@@ -77,51 +57,14 @@ const Login: React.FC = () => {
   return (
     <Container maxWidth="sm">
       <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Sign In
-        </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-          <Box sx={{ textAlign: 'center' }}>
-            <Link component={RouterLink} to="/register" variant="body2">
-              Don't have an account? Sign up
-            </Link>
+        <Typography variant="h4" align="center">Sign In</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField required fullWidth label="Email Address" name="email" value={formData.email} onChange={handleChange} margin="normal" />
+          <TextField required fullWidth label="Password" type="password" name="password" value={formData.password} onChange={handleChange} margin="normal" />
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>Sign In</Button>
+          <Box textAlign="center">
+            <Link component={RouterLink} to="/register" variant="body2">Don't have an account? Sign up</Link>
           </Box>
         </Box>
       </Paper>
@@ -129,4 +72,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login; 
+export default Login;

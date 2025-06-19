@@ -8,6 +8,7 @@ import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import PrivateRoute from './components/auth/PrivateRoute';
 import WordFlashcard from './components/wordflashcard/WordFlashcard';
+import SelectChild from './components/dashboard/SelectChild';
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/select-child" element={<SelectChild />} />
           <Route
             path="/dashboard"
             element={

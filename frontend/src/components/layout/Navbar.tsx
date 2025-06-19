@@ -12,7 +12,13 @@ import SchoolIcon from '@mui/icons-material/School';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const isAuthenticated = false; // TODO: Replace with actual auth state
+  const isAuthenticated = !!localStorage.getItem('token');
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/login?message=You have been logged out.');
+  };
 
   return (
     <AppBar position="static">
@@ -38,17 +44,7 @@ const Navbar: React.FC = () => {
               <>
                 <Button
                   color="inherit"
-                  component={RouterLink}
-                  to="/dashboard"
-                >
-                  Dashboard
-                </Button>
-                <Button
-                  color="inherit"
-                  onClick={() => {
-                    // TODO: Implement logout
-                    navigate('/');
-                  }}
+                  onClick={handleLogout}
                 >
                   Logout
                 </Button>
@@ -78,4 +74,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;
