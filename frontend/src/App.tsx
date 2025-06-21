@@ -10,6 +10,7 @@ import PrivateRoute from './components/auth/PrivateRoute';
 import WordFlashcard from './components/wordflashcard/WordFlashcard';
 import SelectChild from './components/dashboard/SelectChild';
 import StoryGenerator from './components/pages/StoryGenerator';
+import SentenceLearning from './components/pages/SentenceLearning';
 
 
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           />
           <Route path="/wordflashcard" element={<WordFlashcard />} />
           <Route path="/story-generation" element={<StoryGenerator />} />
+          <Route path="/sentence-learning" element={<SentenceLearning />} />
         </Routes>
       </Box>
     </Box>
