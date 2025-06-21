@@ -18,35 +18,21 @@ services:
     networks:
       - wondernest-network
 
-  # evaluation-analytics-service:
-  #   build:
-  #     context: ./backend/evaluation-analytics-service
-  #   container_name: evaluation-analytics-service
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/WonderNest
-  #     SPRING_DATASOURCE_USERNAME: postgres
-  #     SPRING_DATASOURCE_PASSWORD: postgresmeow
-  #   ports:
-  #     - "8082:8080"
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - wondernest-network
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: wondernest-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - user-learning-service
-    networks:
-      - wondernest-network
+#   frontend:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#     container_name: wondernest-frontend
+#     ports:
+#       - "80:80"
+#     depends_on:
+#       - user-learning-service
+#     networks:
+#       - wondernest-network
 
-volumes:
-  postgres-data:
+# volumes:
+#   postgres-data:
 
 networks:
   wondernest-network:
