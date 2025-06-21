@@ -30,7 +30,7 @@ jobs:
       - name:  Build & Test Backend (user-learning-service)
         run: |
           cd backend/user-learning-service
-          mvn clean install
+          ./mvnw clean install
 
       - name:  Build Frontend
         run: |
