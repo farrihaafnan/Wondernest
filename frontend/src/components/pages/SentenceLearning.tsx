@@ -39,7 +39,6 @@ interface SentenceLearningResponse {
 const SentenceLearning: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState<Parent | null>(null);
   const [child, setChild] = useState<Child | null>(null);
   const [sentence, setSentence] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -58,7 +57,6 @@ const SentenceLearning: React.FC = () => {
 
     const state = location.state as any;
     if (state?.parent && state?.child) {
-      setUser(state.parent);
       setChild(state.child);
     } else {
       navigate('/select-child');
