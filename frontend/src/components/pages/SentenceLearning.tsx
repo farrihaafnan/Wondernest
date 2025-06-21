@@ -23,11 +23,6 @@ interface Child {
   gender: string;
 }
 
-interface Parent {
-  id: string;
-  email: string;
-}
-
 interface SentenceLearningResponse {
   imageUrl: string;
   feedback: string;
