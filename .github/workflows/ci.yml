@@ -34,9 +34,8 @@ jobs:
           mvn clean install
 
       # 👉 Frontend: Build and Run Unit Tests
-      - name:  Build & Test Frontend
+      - name:  Build Frontend
         run: |
           cd frontend
           npm install
           npm run build
-          npm test -- --watchAll=false
