@@ -1,0 +1,42 @@
+# File: .github/workflows/ci.yml
+
+name: CI - Frontend & User Learning Service
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name:  Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # 👉 Backend: Build and Test user-learning-service
+      - name:  Build & Test Backend (user-learning-service)
+        run: |
+          cd user-learning-service
+          ./mvnw clean install
+
+      # 👉 Frontend: Build and Run Unit Tests
+      - name:  Build & Test Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          npm test -- --watchAll=false
