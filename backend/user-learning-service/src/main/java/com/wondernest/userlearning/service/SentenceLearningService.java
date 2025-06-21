@@ -83,6 +83,27 @@ public class SentenceLearningService {
 
     public SentenceLearningResponse evaluateSentenceOnly(SentenceLearningRequest request) {
         try {
+            // Validate input
+            if (request.getSentence() == null || request.getSentence().trim().isEmpty()) {
+                return new SentenceLearningResponse(
+                    null,
+                    "Please provide a sentence to evaluate.",
+                    false,
+                    null,
+                    request.getImageDescription()
+                );
+            }
+            
+            if (request.getImageDescription() == null || request.getImageDescription().trim().isEmpty()) {
+                return new SentenceLearningResponse(
+                    null,
+                    "Image description is missing. Please try generating a new image.",
+                    false,
+                    null,
+                    null
+                );
+            }
+            
             // Evaluate the sentence using Gemini with the provided image description
             String evaluationResult = evaluateSentence(request.getSentence(), request.getImageDescription(), request.getChildAge());
             
@@ -159,15 +180,15 @@ public class SentenceLearningService {
             "You are a helpful teacher for a %d-year-old child. " +
             "The child is looking at an image of: %s. " +
             "The child wrote this sentence: \"%s\" " +
-            "Please evaluate this sentence and respond in the following JSON format only: " +
-            "{\"isCorrect\": true/false, \"feedback\": \"encouraging feedback message\", \"correctedSentence\": \"corrected version if needed, otherwise null\"} " +
-            "Consider: " +
-            "1. Grammar and spelling correctness " +
-            "2. Whether the sentence actually describes the image " +
-            "3. Age-appropriate language " +
-            "4. Be encouraging and supportive in your feedback " +
-            "5. If there are errors, provide a corrected version " +
-            "6. If the sentence is correct, set correctedSentence to null",
+            "Evaluate this sentence and respond ONLY with valid JSON in this exact format: " +
+            "{\"isCorrect\": true or false, \"feedback\": \"encouraging message\", \"correctedSentence\": \"corrected version or null\"} " +
+            "Rules: " +
+            "1. Check grammar and spelling " +
+            "2. Verify the sentence describes the image " +
+            "3. Use age-appropriate language " +
+            "4. Be encouraging and supportive " +
+            "5. If sentence is correct, set correctedSentence to null " +
+            "6. Respond ONLY with the JSON, no other text",
             childAge, imageDescription, sentence
         );
 
@@ -201,20 +222,34 @@ public class SentenceLearningService {
             }
 
             String responseBody = response.body().string();
+            System.out.println("Full Gemini API response: " + responseBody);
+            
             JsonNode json = objectMapper.readTree(responseBody);
-
-            return json.path("candidates")
+            
+            // Check if the response has the expected structure
+            if (!json.has("candidates") || json.get("candidates").size() == 0) {
+                System.out.println("No candidates in Gemini response");
+                throw new IOException("Invalid response structure from Gemini API");
+            }
+            
+            String text = json.path("candidates")
                        .path(0)
                        .path("content")
                        .path("parts")
                        .path(0)
                        .path("text")
                        .asText("Error evaluating sentence");
+                       
+            System.out.println("Extracted text from Gemini: " + text);
+            return text;
         }
     }
 
     private SentenceEvaluation parseEvaluationResult(String evaluationResult) {
         try {
+            // Log the raw response for debugging
+            System.out.println("Raw Gemini response: " + evaluationResult);
+            
             // Try to parse as JSON first
             JsonNode json = objectMapper.readTree(evaluationResult);
             return new SentenceEvaluation(
@@ -223,7 +258,31 @@ public class SentenceLearningService {
                 json.path("correctedSentence").asText(null)
             );
         } catch (Exception e) {
-            // If JSON parsing fails, provide a default response
+            // Log the parsing error
+            System.out.println("JSON parsing error: " + e.getMessage());
+            System.out.println("Failed to parse response: " + evaluationResult);
+            
+            // If JSON parsing fails, try to extract JSON from the response
+            // Sometimes Gemini wraps the JSON in markdown or other text
+            try {
+                int jsonStart = evaluationResult.indexOf("{");
+                int jsonEnd = evaluationResult.lastIndexOf("}");
+                if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                    String jsonPart = evaluationResult.substring(jsonStart, jsonEnd + 1);
+                    System.out.println("Extracted JSON part: " + jsonPart);
+                    
+                    JsonNode json = objectMapper.readTree(jsonPart);
+                    return new SentenceEvaluation(
+                        json.path("isCorrect").asBoolean(),
+                        json.path("feedback").asText(),
+                        json.path("correctedSentence").asText(null)
+                    );
+                }
+            } catch (Exception ex) {
+                System.out.println("Failed to extract JSON: " + ex.getMessage());
+            }
+            
+            // If all parsing fails, provide a default response
             return new SentenceEvaluation(
                 false,
                 "I couldn't evaluate your sentence properly. Please try again!",
