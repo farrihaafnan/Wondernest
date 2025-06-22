@@ -11,6 +11,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { API_BASE_URL } from '../../apiConfig';
 
 interface RegisterFormData {
   email: string;
@@ -45,7 +46,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8081/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

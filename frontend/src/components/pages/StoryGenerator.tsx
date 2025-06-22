@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, CircularProgress, List, ListItem, ListItemButton, ListItemText, Divider } from '@mui/material';
 import html2pdf from 'html2pdf.js';
 import { useLocation } from 'react-router-dom';
+import { API_BASE_URL } from '../../apiConfig';
 
 interface Child {
   id: string;
@@ -37,7 +38,7 @@ const StoryGenerator: React.FC = () => {
 
   const fetchStoryList = async (childId: string) => {
     try {
-      const res = await fetch(`http://localhost:8081/api/story/list/${childId}`);
+      const res = await fetch(`${API_BASE_URL}/api/story/list/${childId}`);
       const data = await res.json();
       setStories(data);
     } catch (err) {
@@ -53,7 +54,7 @@ const StoryGenerator: React.FC = () => {
     setStory('');
 
     try {
-      const response = await fetch('http://localhost:8081/api/story/generate', {
+      const response = await fetch(`${API_BASE_URL}/api/story/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +91,7 @@ const StoryGenerator: React.FC = () => {
 
   const handleStoryClick = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8081/api/story/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/story/${id}`);
       const html = await res.text();
       setStory(html);
       setShowStory(true);
