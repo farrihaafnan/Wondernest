@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/children").permitAll()
                 .requestMatchers("/api/parents/**").permitAll()
                 .requestMatchers("/api/story/**").permitAll()
+                .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/sentence-learning/health").permitAll()
                 .requestMatchers("/api/sentence-learning/**").permitAll()
                 .anyRequest().authenticated()

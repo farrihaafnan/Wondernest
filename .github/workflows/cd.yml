@@ -73,6 +73,16 @@ jobs:
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml logs --tail=20"
       
+      - name: Check container details
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker ps -a"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs wondernest-frontend --tail=20 || echo 'Frontend container not found'"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'Backend container not found'"
+      
+      - name: Check network connectivity
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "netstat -tlnp | grep :80 || echo 'Port 80 not listening'"
+      
       - name: Test frontend accessibility
         run: |
           curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
