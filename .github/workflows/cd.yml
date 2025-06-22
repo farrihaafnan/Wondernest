@@ -14,6 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Wait for file system to stabilize
+        run: |
+          sleep 5
+      
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -34,9 +38,7 @@ jobs:
       
       - name: Copy project files
         run: |
-          tar -czf wondernest.tar.gz --exclude='.git' --exclude='node_modules' --exclude='target' .
-          scp wondernest.tar.gz ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && tar -xzf wondernest.tar.gz && rm wondernest.tar.gz"
+          rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.github' --exclude='wondernest.tar.gz' ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
       
       - name: Create environment file
         run: |
