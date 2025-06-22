@@ -30,9 +30,21 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Debug secrets (without exposing sensitive data)
+        run: |
+          echo "VM Host length: ${#AZURE_VM_HOST}"
+          echo "VM User length: ${#AZURE_VM_USER}"
+          echo "SSH Key length: ${#AZURE_VM_SSH_PRIVATE_KEY}"
+          echo "VM Host: ${{ secrets.AZURE_VM_HOST }}"
+          echo "VM User: ${{ secrets.AZURE_VM_USER }}"
+
       - name: Set up Docker context for remote host
         run: |
-          docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}"
+          echo "Creating Docker context with: ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}"
+          docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}" || {
+            echo "Failed to create Docker context. Trying alternative approach..."
+            docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:22"
+          }
           docker context use azure-vm
       
       - name: Deploy with docker-compose
