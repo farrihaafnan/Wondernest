@@ -38,34 +38,22 @@ jobs:
           echo "VM Host: ${{ secrets.AZURE_VM_HOST }}"
           echo "VM User: ${{ secrets.AZURE_VM_USER }}"
 
-      - name: Set up Docker context for remote host
+      - name: Copy files to VM
         run: |
-          echo "Creating Docker context with: ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}"
-          docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}" || {
-            echo "Failed to create Docker context. Trying alternative approach..."
-            docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:22"
-          }
-          docker context use azure-vm
-      
-      - name: Deploy with docker-compose
-        env:
-          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          scp -r . ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/${{ secrets.AZURE_VM_USER }}/wondernest
+
+      - name: Deploy on VM
         run: |
-          docker compose -f docker-compose.deploy.yml down || true
-          docker compose -f docker-compose.deploy.yml pull
-          docker compose -f docker-compose.deploy.yml up --build -d
-      
-      - name: Verify deployment
-        run: |
-          docker compose -f docker-compose.deploy.yml ps
-      
-      - name: Reset Docker context
-        if: always()
-        run: |
-          docker context use default
-          docker context rm azure-vm 
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} << 'EOF'
+            cd /home/${{ secrets.AZURE_VM_USER }}/wondernest
+            export SPRING_DATASOURCE_URL="${{ secrets.SPRING_DATASOURCE_URL }}"
+            export SPRING_DATASOURCE_USERNAME="${{ secrets.SPRING_DATASOURCE_USERNAME }}"
+            export SPRING_DATASOURCE_PASSWORD="${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
+            export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
+            export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+            export OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}"
+            docker-compose -f docker-compose.deploy.yml down || true
+            docker-compose -f docker-compose.deploy.yml pull
+            docker-compose -f docker-compose.deploy.yml up --build -d
+            docker-compose -f docker-compose.deploy.yml ps
+          EOF 
