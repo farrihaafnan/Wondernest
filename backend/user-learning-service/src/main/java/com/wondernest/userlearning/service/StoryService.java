@@ -23,7 +23,7 @@ import java.util.UUID;
 public class StoryService {
 
     private static final String GEMINI_API_KEY = "AIzaSyBMtAt_HvGPPnWd_CZLsbZ4UFsL_AGaefc";
-    private static final String OPENAI_API_KEY = "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";
+    private static final String OPENAI_API_KEY = "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";
     private static final String GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private static final String DALL_E_ENDPOINT = "https://api.openai.com/v1/images/generations";
 

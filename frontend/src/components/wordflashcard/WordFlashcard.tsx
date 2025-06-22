@@ -43,7 +43,7 @@ const WordFlashcard: React.FC = () => {
     setLoading(true);
     setError('');
     
-    fetch(`http://localhost:8081/api/words?range=${selectedRange}`, {
+    fetch(`http://74.225.176.36:8081/api/words?range=${selectedRange}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
