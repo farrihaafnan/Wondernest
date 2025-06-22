@@ -54,6 +54,8 @@ jobs:
       - name: Stop existing containers
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rm -f user-learning-service wondernest-frontend || true"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rmi wondernest-deployment_user-learning-service wondernest-deployment_frontend || true"
       
       - name: Build and deploy
         run: |
