@@ -3,7 +3,7 @@ name: Deploy to Azure VM
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch: 
 
 jobs:
@@ -30,30 +30,23 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Debug secrets (without exposing sensitive data)
+      - name: Set up Docker context for remote host
         run: |
-          echo "VM Host length: ${#AZURE_VM_HOST}"
-          echo "VM User length: ${#AZURE_VM_USER}"
-          echo "SSH Key length: ${#AZURE_VM_SSH_PRIVATE_KEY}"
-          echo "VM Host: ${{ secrets.AZURE_VM_HOST }}"
-          echo "VM User: ${{ secrets.AZURE_VM_USER }}"
-
-      - name: Copy files to VM
+          docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}"
+          docker context use azure-vm
+      
+      - name: Deploy with docker-compose
         run: |
-          scp -r . ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:/home/${{ secrets.AZURE_VM_USER }}/wondernest
-
-      - name: Deploy on VM
+          docker compose -f docker-compose.deploy.yml down || true
+          docker compose -f docker-compose.deploy.yml pull
+          docker compose -f docker-compose.deploy.yml up --build -d
+      
+      - name: Verify deployment
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} << 'EOF'
-            cd /home/${{ secrets.AZURE_VM_USER }}/wondernest
-            export SPRING_DATASOURCE_URL="${{ secrets.SPRING_DATASOURCE_URL }}"
-            export SPRING_DATASOURCE_USERNAME="${{ secrets.SPRING_DATASOURCE_USERNAME }}"
-            export SPRING_DATASOURCE_PASSWORD="${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
-            export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
-            export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
-            export OPENROUTER_API_KEY="${{ secrets.OPENROUTER_API_KEY }}"
-            docker-compose -f docker-compose.deploy.yml down || true
-            docker-compose -f docker-compose.deploy.yml pull
-            docker-compose -f docker-compose.deploy.yml up --build -d
-            docker-compose -f docker-compose.deploy.yml ps
-          EOF 
+          docker compose -f docker-compose.deploy.yml ps
+      
+      - name: Reset Docker context
+        if: always()
+        run: |
+          docker context use default
+          docker context rm azure-vm
