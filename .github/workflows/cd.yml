@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -14,39 +14,65 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
       
-      - name: Add Azure VM to known hosts
+      - name: Add VM to known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Set up Docker context for remote host
-        run: |
-          docker context create azure-vm --docker "host=ssh://${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}"
-          docker context use azure-vm
       
-      - name: Deploy with docker-compose
+      - name: Test SSH connection
         run: |
-          docker compose -f docker-compose.deploy.yml down || true
-          docker compose -f docker-compose.deploy.yml pull
-          docker compose -f docker-compose.deploy.yml up --build -d
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "echo 'SSH connection successful'"
       
-      - name: Verify deployment
+      - name: Create deployment directory
         run: |
-          docker compose -f docker-compose.deploy.yml ps
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "mkdir -p ~/wondernest-deployment"
       
-      - name: Reset Docker context
-        if: always()
+      - name: Copy project files
         run: |
-          docker context use default
-          docker context rm azure-vm
+          tar -czf wondernest.tar.gz --exclude='.git' --exclude='node_modules' --exclude='target' .
+          scp wondernest.tar.gz ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && tar -xzf wondernest.tar.gz && rm wondernest.tar.gz"
+      
+      - name: Create environment file
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cat > ~/wondernest-deployment/.env << 'EOF'
+          SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+          EOF"
+      
+      - name: Stop existing containers
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
+      
+      - name: Build and deploy
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml up --build -d"
+      
+      - name: Wait for services to start
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 30"
+      
+      - name: Check deployment status
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml ps"
+      
+      - name: Check service logs
+        run: |
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml logs --tail=20"
+      
+      - name: Test frontend accessibility
+        run: |
+          curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
+      
+      - name: Test backend API
+        run: |
+          curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || echo "Backend API not accessible yet"
