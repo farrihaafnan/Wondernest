@@ -9,6 +9,7 @@ import {
   Box,
   Link,
   Alert,
+  Grid,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
@@ -68,68 +69,131 @@ const Register: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
-        <Typography variant="h4" component="h1" align="center" gutterBottom>
-          Create Account
-        </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="confirmPassword"
-            label="Confirm Password"
-            type="password"
-            id="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 63,
+        left: 0,
+        m: 0,
+        p: 0,
+        width: '99vw',
+        height: '92vh',
+        overflow: 'hidden',
+        backgroundColor: 'background.default',
+        backgroundImage: 'url("/register-illustration.png")',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        backgroundPosition: 'left center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        pt: 8
+      }}
+    >
+      <Grid container spacing={0} sx={{ width: '100%', height: '100%' }}>
+        {/* Optional: Keep or remove left Grid */}
+        <Grid item xs={false} md={7} />
+
+        {/* Right-side Form */}
+        <Grid item xs={12} md={5}>
+          <Paper
+            elevation={4}
+            sx={{
+              p: 4,
+              borderRadius: 4,
+              bgcolor: 'white',
+              boxShadow: 6,
+              width: '100%',
+              maxWidth: 420,
+              mx: 'auto',
+            }}
           >
-            Register
-          </Button>
-          <Box sx={{ textAlign: 'center' }}>
-            <Link component={RouterLink} to="/login" variant="body2">
-              Already have an account? Sign in
-            </Link>
-          </Box>
-        </Box>
-      </Paper>
-    </Container>
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}
+            >
+              Create Account
+            </Typography>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{ color: 'text.secondary', mb: 3 }}
+            >
+              Let’s start your journey ✨
+            </Typography>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#fff', borderRadius: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                value={formData.password}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#fff', borderRadius: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                type="password"
+                id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                sx={{ backgroundColor: '#fff', borderRadius: 2 }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="secondary"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  py: 1.5,
+                  fontWeight: 'bold',
+                  borderRadius: '30px',
+                  textTransform: 'none',
+                }}
+              >
+                🎉 Register
+              </Button>
+              <Box sx={{ textAlign: 'center' }}>
+                <Link component={RouterLink} to="/login" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
-export default Register; 
+export default Register;

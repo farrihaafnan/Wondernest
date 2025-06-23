@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Container, Paper, Typography, TextField, Button, Box, Link, Alert,
+  Container, Paper, Typography, TextField, Button, Box, Link, Alert,Grid,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
@@ -56,20 +56,118 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 4, mt: 8 }}>
-        <Typography variant="h4" align="center">Sign In</Typography>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField required fullWidth label="Email Address" name="email" value={formData.email} onChange={handleChange} margin="normal" />
-          <TextField required fullWidth label="Password" type="password" name="password" value={formData.password} onChange={handleChange} margin="normal" />
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>Sign In</Button>
-          <Box textAlign="center">
-            <Link component={RouterLink} to="/register" variant="body2">Don't have an account? Sign up</Link>
-          </Box>
-        </Box>
-      </Paper>
+    <Box
+    sx={{
+    position: 'absolute',
+    top: 63,
+    left: 0,
+    m: 0,
+    p: 0,
+    width: '99vw',
+    height: '92vh',
+    overflow: 'hidden',
+    backgroundColor: 'background.default',
+    backgroundImage: 'url("/login-illustration3.png")',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+    backgroundPosition: 'left center',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end', // aligns the form to the right
+    }}
+  >
+    <Container maxWidth="lg">
+      <Grid container spacing={4} alignItems="center">
+        {/* Left Illustration */}
+        <Grid item xs={12} md={7}>
+         
+        </Grid>
+
+        {/* Right Login Form */}
+        <Grid item xs={12} md={5}>
+          <Paper
+            elevation={4}
+            sx={{
+              p: 4,
+              borderRadius: 4,
+              bgcolor: 'white',
+              boxShadow: 6,
+              width: '100%',
+              maxWidth: 420,
+              mx: 'auto',
+              ml: 14,
+            }}
+          >
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}
+            >
+              Welcome Back!
+            </Typography>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{ color: 'text.secondary', mb: 3 }}
+            >
+              Let’s get learning again ✨
+            </Typography>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                required
+                fullWidth
+                label="Email Address"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                margin="normal"
+                sx={{ backgroundColor: '#fff', borderRadius: 2 }}
+              />
+              <TextField
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                margin="normal"
+                sx={{ backgroundColor: '#fff', borderRadius: 2 }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="secondary"
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  py: 1.5,
+                  fontWeight: 'bold',
+                  borderRadius: '30px',
+                  textTransform: 'none',
+                }}
+              >
+                🚀 Sign In
+              </Button>
+              <Box textAlign="center">
+                <Link component={RouterLink} to="/register" variant="body2">
+                  Don't have an account? Sign up
+                </Link>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
     </Container>
+  </Box>
   );
 };
 
