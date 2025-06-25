@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
     { text: 'Sentence Learning', path: '/sentence-learning' },
     { text: 'Story Generation', path: '/story-generation' },
     { text: 'Word Matching', path: '/word-matching' },
-    { text: 'Sentence Correction', path: '/sentence-correction' },
+    { text: 'Sentence Correction', path: '/sentence-evaluation' },
     { text: 'Puzzle', path: '/puzzle' },
   ];
 

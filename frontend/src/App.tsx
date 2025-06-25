@@ -11,8 +11,8 @@ import WordFlashcard from './components/wordflashcard/WordFlashcard';
 import SelectChild from './components/dashboard/SelectChild';
 import StoryGenerator from './components/pages/StoryGenerator';
 import SentenceLearning from './components/pages/SentenceLearning';
-
-
+import SentenceEvaluation from './components/pages/SentenceEvaluation';
+import WordMatching from './components/pages/WordMatching';
 
 
 const App: React.FC = () => {
@@ -36,6 +36,8 @@ const App: React.FC = () => {
           <Route path="/wordflashcard" element={<WordFlashcard />} />
           <Route path="/story-generation" element={<StoryGenerator />} />
           <Route path="/sentence-learning" element={<SentenceLearning />} />
+          <Route path="/sentence-evaluation" element={<SentenceEvaluation />} />
+          <Route path="/word-matching" element={<WordMatching />} />
         </Routes>
       </Box>
     </Box>

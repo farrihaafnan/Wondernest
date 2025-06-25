@@ -32,6 +32,11 @@ jobs:
           cd backend/user-learning-service
           ./mvnw clean install
 
+      - name:  Build & Test Backend (evaluation-analytics-service)
+        run: |
+          cd backend/evaluation-analytics-service
+          ./mvnw clean install
+
       - name:  Build Frontend
         run: |
           cd frontend

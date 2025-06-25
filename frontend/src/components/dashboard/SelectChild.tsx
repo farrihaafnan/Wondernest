@@ -38,6 +38,7 @@ const SelectChild: React.FC = () => {
   }, [navigate, token, user?.id]);
 
   const handleChildSelect = (child: Child) => {
+    localStorage.setItem('selectedChild', JSON.stringify(child));
     navigate('/dashboard', { state: { parent: user, child } });
   };
 

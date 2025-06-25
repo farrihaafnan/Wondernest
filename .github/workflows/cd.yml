@@ -77,7 +77,8 @@ jobs:
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker ps -a"
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs wondernest-frontend --tail=20 || echo 'Frontend container not found'"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'Backend container not found'"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'User Learning container not found'"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs evaluation-analytics-service --tail=20 || echo 'Evaluation analytics container not found'"
       
       - name: Check network connectivity
         run: |
@@ -87,6 +88,6 @@ jobs:
         run: |
           curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
       
-      - name: Test backend API
+      - name: Test User Learning API
         run: |
           curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || echo "Backend API not accessible yet"

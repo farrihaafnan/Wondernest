@@ -20,6 +20,24 @@ services:
     networks:
       - wondernest-network
 
+  evaluation-analytics-service:
+    build:
+      context: ./backend/evaluation-analytics-service
+    container_name: evaluation-analytics-service
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 1
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SERVER_PORT: 8082
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    networks:
+      - wondernest-network
 
   frontend:
     build:
@@ -30,6 +48,7 @@ services:
       - "80:80"
     depends_on:
       - user-learning-service
+      - evaluation-analytics-service
     networks:
       - wondernest-network
 
