@@ -45,5 +45,8 @@ out/
 .DS_Store
 Thumbs.db 
 
+# Ignore environment variable files
+.env
 
+command_cheat_sheet.txt
 git_cheat_sheet.txt

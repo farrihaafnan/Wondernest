@@ -9,6 +9,7 @@ import {
   CardMedia,
   CardContent,
 } from '@mui/material';
+import { API_BASE_URL } from '../../apiConfig';
 
 const ranges = [
   { label: 'A-E', value: 'A-E' },
@@ -43,7 +44,7 @@ const WordFlashcard: React.FC = () => {
     setLoading(true);
     setError('');
     
-    fetch(`http://74.225.176.36:8081/api/words?range=${selectedRange}`, {
+    fetch(`${API_BASE_URL}/api/words?range=${selectedRange}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

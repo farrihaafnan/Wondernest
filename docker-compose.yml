@@ -6,33 +6,38 @@ services:
       context: ./backend/user-learning-service
     container_name: user-learning-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://aws-0-us-east-2.pooler.supabase.com:5432/postgres
-      SPRING_DATASOURCE_USERNAME: postgres.jsegudbopvtfpyijivcn
-      SPRING_DATASOURCE_PASSWORD: GRPEy9M24Sm620Dr
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 1
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_JPA_SHOW_SQL: true
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SERVER_PORT: 8081
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     ports:
       - "8081:8081"
     networks:
       - wondernest-network
 
 
-#   frontend:
-#     build:
-#       context: ./frontend
-#       dockerfile: Dockerfile
-#     container_name: wondernest-frontend
-#     ports:
-#       - "80:80"
-#     depends_on:
-#       - user-learning-service
-#     networks:
-#       - wondernest-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: wondernest-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - user-learning-service
+    networks:
+      - wondernest-network
 
-# volumes:
-#   postgres-data:
+
+volumes:
+  postgres-data:
 
 networks:
   wondernest-network:

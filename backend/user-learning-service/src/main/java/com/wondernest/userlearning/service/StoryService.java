@@ -1,4 +1,3 @@
-
 package com.wondernest.userlearning.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,6 +11,7 @@ import okhttp3.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -22,10 +22,14 @@ import java.util.UUID;
 @Service
 public class StoryService {
 
-    private static final String GEMINI_API_KEY = "AIzaSyBMtAt_HvGPPnWd_CZLsbZ4UFsL_AGaefc";
-    private static final String OPENAI_API_KEY = "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";
-    private static final String GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-    private static final String DALL_E_ENDPOINT = "https://api.openai.com/v1/images/generations";
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
+    @Value("${openai.api.key}")
+    private String openaiApiKey;
+    @Value("${gemini.endpoint:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}")
+    private String geminiEndpoint;
+    @Value("${dall_e.endpoint:https://api.openai.com/v1/images/generations}")
+    private String dallEEndpoint;
 
     private final OkHttpClient httpClient = new OkHttpClient.Builder()
     .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
@@ -76,8 +80,8 @@ public class StoryService {
                 MediaType.parse("application/json")
         );
 
-        HttpUrl url = HttpUrl.parse(GEMINI_ENDPOINT).newBuilder()
-                .addQueryParameter("key", GEMINI_API_KEY)
+        HttpUrl url = HttpUrl.parse(geminiEndpoint).newBuilder()
+                .addQueryParameter("key", geminiApiKey)
                 .build();
 
         Request requestObj = new Request.Builder()
@@ -117,9 +121,9 @@ private String generateImageUrl(String prompt) throws IOException {
     RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
 
     Request request = new Request.Builder()
-            .url(DALL_E_ENDPOINT)
+            .url(dallEEndpoint)
             .post(body)
-            .addHeader("Authorization", "Bearer " + OPENAI_API_KEY)
+            .addHeader("Authorization", "Bearer " + openaiApiKey)
             .addHeader("Content-Type", "application/json")
             .build();
 

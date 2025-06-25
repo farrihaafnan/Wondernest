@@ -15,6 +15,7 @@ import {
   Divider
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../apiConfig';
 
 interface Child {
   id: string;
@@ -71,7 +72,7 @@ const SentenceLearning: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8081/api/sentence-learning/generate-image', {
+      const response = await fetch(`${API_BASE_URL}/api/sentence-learning/generate-image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ const SentenceLearning: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const evaluationResponse = await fetch('http://localhost:8081/api/sentence-learning/evaluate', {
+      const evaluationResponse = await fetch(`${API_BASE_URL}/api/sentence-learning/evaluate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

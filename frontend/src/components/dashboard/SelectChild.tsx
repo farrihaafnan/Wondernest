@@ -4,6 +4,7 @@ import {
   Card, CardContent, Typography, Grid, Avatar, Button, Container,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem
 } from '@mui/material';
+import { API_BASE_URL } from '../../apiConfig';
 
 interface Child {
   id: string;
@@ -28,7 +29,7 @@ const SelectChild: React.FC = () => {
       return;
     }
 
-    fetch(`http://localhost:8081/api/parents/${user.id}/children`, {
+    fetch(`${API_BASE_URL}/api/parents/${user.id}/children`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -42,7 +43,7 @@ const SelectChild: React.FC = () => {
 
   const handleAddKid = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/children', {
+      const response = await fetch(`${API_BASE_URL}/api/children`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ const SelectChild: React.FC = () => {
 
       if (!response.ok) throw new Error('Failed to add child');
 
-      const updated = await fetch(`http://localhost:8081/api/parents/${user.id}/children`).then(res => res.json());
+      const updated = await fetch(`${API_BASE_URL}/api/parents/${user.id}/children`).then(res => res.json());
       setChildren(updated);
       setOpen(false);
       setNewChild({ name: '', age: '', gender: '', avatarUrl: '' });

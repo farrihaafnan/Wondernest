@@ -9,6 +9,7 @@ import {
   Container,
   Alert,
 } from '@mui/material';
+import { API_BASE_URL } from '../../apiConfig';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const RegisterForm = () => {
 
     try {
       const response = await axios.post(
-        'http://74.225.176.36:8081/api/auth/register',
+        `${API_BASE_URL}/api/auth/register`,
         formData
       );
       
