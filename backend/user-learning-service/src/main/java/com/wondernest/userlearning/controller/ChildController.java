@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost", "http://localhost:80", "http://localhost:3000"})
 public class ChildController {
 
     @Autowired

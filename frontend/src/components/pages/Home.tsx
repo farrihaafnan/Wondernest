@@ -46,7 +46,7 @@ const Home: React.FC = () => {
             Learning Starts with Wonder!
           </Typography>
           <Typography variant="h5" sx={{ mb: 4, color: 'text.secondary' }}>
-            WonderNest makes every lesson feel like playtime — powered by AI, designed for kids.
+            WonderNest makes every lesson feel like playtime — powered by AI , designed for kids.
           </Typography>
           <Button
             component={RouterLink}
@@ -229,11 +229,6 @@ const Home: React.FC = () => {
           title: 'Smart Insights',
           description: 'Track growth with fun visuals and helpful progress updates.',
           image: '/mascot-graph.svg',
-        },
-        {
-          title: 'Safe Peer Interaction',
-          description: 'Connect safely with classmates and learn together.',
-          image: '/mascot-friends.svg',
         },
       ].map((feature, index) => (
         <Grid item xs={12} md={4} key={index}>
