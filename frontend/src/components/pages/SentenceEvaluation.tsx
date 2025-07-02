@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
+import { EVALUATION_API_BASE_URL } from '../../apiConfig';
 
 interface TestItem {
   original: string;
@@ -28,7 +29,7 @@ const SentenceEvaluation: React.FC = () => {
     setTestSubmitted(false);
     setScore(0);
     try {
-      const res = await axios.get('http://74.225.176.36:8082/api/evaluation/sentences?count=5');
+      const res = await axios.get(`${EVALUATION_API_BASE_URL}/api/evaluation/sentences?count=5`);
       const sentences: string[] = res.data;
       if (!Array.isArray(sentences) || sentences.length < NUM_QUESTIONS) {
         setError('Could not fetch enough unique sentences. Please try again.');
@@ -53,7 +54,7 @@ const SentenceEvaluation: React.FC = () => {
     try {
       const results = await Promise.all(
         testItems.map(item =>
-          axios.post('http://74.225.176.36:8082/api/evaluation/check', {
+          axios.post(`${EVALUATION_API_BASE_URL}/api/evaluation/check`, {
             original: item.original,
             userCorrection: item.userCorrection,
           }).then(res => res.data)
@@ -87,7 +88,7 @@ const SentenceEvaluation: React.FC = () => {
           };
           console.log('[DEBUG] About to POST to /api/evaluation/sentence-correction with payload:', payload);
           try {
-            const resp = await axios.post('http://74.225.176.36:8082/api/evaluation/sentence-correction', payload);
+            const resp = await axios.post(`${EVALUATION_API_BASE_URL}/api/evaluation/sentence-correction`, payload);
             console.log('[DEBUG] POST /api/evaluation/sentence-correction response:', resp);
           } catch (err) {
             console.error('[DEBUG] POST /api/evaluation/sentence-correction error:', err);

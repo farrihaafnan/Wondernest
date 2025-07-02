@@ -4,7 +4,7 @@ import {
   Container, Paper, Typography, TextField, Button, Box, Link, Alert,Grid,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { API_BASE_URL } from '../../apiConfig';
+import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 interface LoginFormData {
   email: string;
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${USER_LEARNING_API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -110,7 +110,7 @@ const Login: React.FC = () => {
               align="center"
               sx={{ color: 'text.secondary', mb: 3 }}
             >
-              Let’s get learning again ✨
+              Let's get learning again ✨
             </Typography>
 
             {error && (

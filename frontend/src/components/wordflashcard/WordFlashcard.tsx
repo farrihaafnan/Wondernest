@@ -9,7 +9,7 @@ import {
   CardMedia,
   CardContent,
 } from '@mui/material';
-import { API_BASE_URL } from '../../apiConfig';
+import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 const ranges = [
   { label: 'A-E', value: 'A-E' },
@@ -44,7 +44,7 @@ const WordFlashcard: React.FC = () => {
     setLoading(true);
     setError('');
     
-    fetch(`${API_BASE_URL}/api/words?range=${selectedRange}`, {
+    fetch(`${USER_LEARNING_API_BASE_URL}/api/words?range=${selectedRange}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

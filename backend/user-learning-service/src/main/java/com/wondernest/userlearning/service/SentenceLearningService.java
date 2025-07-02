@@ -144,7 +144,7 @@ public class SentenceLearningService {
         {
           "prompt": "%s, cartoon style, kid friendly, colorful, simple background",
           "n": 1,
-          "size": "512x512"
+          "size": "256x256"
         }
         """.formatted(prompt);
 
