@@ -38,7 +38,7 @@ const WordMatching: React.FC = () => {
     setScore(null);
     setFeedback([]);
     try {
-      const resp = await axios.get(`${EVALUATION_API_BASE_URL}/api/evaluation/word-matching/generate?letterRange=${letterRange}`);
+      const resp = await axios.get(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/generate?letterRange=${letterRange}`);
       // The backend returns: { words: [...], images: [...], correctPairs: [{word, imageUrl}], letterRange }
       setImages(resp.data.images);
       setWords(resp.data.words);
@@ -80,7 +80,7 @@ const WordMatching: React.FC = () => {
         score: userMatches.filter((w, i) => w === correctWords[i]).length,
       };
       console.log('[DEBUG] Submitting:', payload);
-      const resp = await axios.post(`${EVALUATION_API_BASE_URL}/api/evaluation/word-matching/submit`, payload);
+      const resp = await axios.post(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/submit`, payload);
       setScore(resp.data.score);
       setFeedback(resp.data.correct);
       setSubmitted(true);
