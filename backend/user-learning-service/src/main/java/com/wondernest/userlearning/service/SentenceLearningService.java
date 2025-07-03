@@ -142,9 +142,10 @@ public class SentenceLearningService {
     private String generateImageUrl(String prompt) throws IOException {
         String json = """
         {
-          "prompt": "%s, cartoon style, kid friendly, colorful, simple background",
-          "n": 1,
-          "size": "512x512"
+          \"model\": \"dall-e-2\",
+          \"prompt\": \"%s, cartoon style, kid friendly, colorful, simple background\",
+          \"n\": 1,
+          \"size\": \"256x256\"
         }
         """.formatted(prompt);
 

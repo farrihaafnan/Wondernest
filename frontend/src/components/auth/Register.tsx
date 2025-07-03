@@ -12,7 +12,7 @@ import {
   Grid,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { API_BASE_URL } from '../../apiConfig';
+import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 interface RegisterFormData {
   email: string;
@@ -47,7 +47,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const response = await fetch(`${USER_LEARNING_API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const Register: React.FC = () => {
               align="center"
               sx={{ color: 'text.secondary', mb: 3 }}
             >
-              Let’s start your journey ✨
+              Let's start your journey ✨
             </Typography>
 
             {error && (

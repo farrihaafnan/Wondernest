@@ -15,7 +15,7 @@ import {
   Divider
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from '../../apiConfig';
+import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 interface Child {
   id: string;
@@ -72,7 +72,7 @@ const SentenceLearning: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/sentence-learning/generate-image`, {
+      const response = await fetch(`${USER_LEARNING_API_BASE_URL}/api/sentence-learning/generate-image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ const SentenceLearning: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const evaluationResponse = await fetch(`${API_BASE_URL}/api/sentence-learning/evaluate`, {
+      const evaluationResponse = await fetch(`${USER_LEARNING_API_BASE_URL}/api/sentence-learning/evaluate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ const SentenceLearning: React.FC = () => {
           <Card sx={{ mb: 3 }}>
             <CardMedia
               component="img"
-              height="400"
+              height="256"
               image={response.imageUrl}
               alt="Generated image"
               sx={{ objectFit: 'contain' }}
