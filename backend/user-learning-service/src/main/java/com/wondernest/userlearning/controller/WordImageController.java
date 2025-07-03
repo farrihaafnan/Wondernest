@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost", "http://localhost:80", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost", "http://localhost:80", "http://localhost:3000", "http://localhost:8080", "http://localhost:8081"})
 public class WordImageController {
     private final WordImageService service;
 
@@ -15,12 +15,8 @@ public class WordImageController {
         this.service = service;
     }
 
-    @GetMapping("/words")
-    public List<WordImageResponse> getWords(@RequestParam String range) {
-        // Example range: "A-E"
-        String[] parts = range.split("-");
-        char start = parts[0].charAt(0);
-        char end = parts[1].charAt(0);
-        return service.getWordImages(start, end);
+    @GetMapping("/word-image")
+    public WordImageResponse getWordImage(@RequestParam char letter) {
+        return service.getWordImage(letter);
     }
 } 

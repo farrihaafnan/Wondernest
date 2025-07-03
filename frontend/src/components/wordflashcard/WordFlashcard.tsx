@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -25,26 +25,35 @@ interface WordImage {
   imageUrl: string;
 }
 
+const getLettersInRange = (range: string): string[] => {
+  const [start, end] = range.split('-');
+  const startCode = start.charCodeAt(0);
+  const endCode = end.charCodeAt(0);
+  const letters = [];
+  for (let i = startCode; i <= endCode; i++) {
+    letters.push(String.fromCharCode(i));
+  }
+  return letters;
+};
+
 const WordFlashcard: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState<string>('A-E');
-  const [words, setWords] = useState<WordImage[]>([]);
+  const [letters, setLetters] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [currentWordImage, setCurrentWordImage] = useState<WordImage | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [started, setStarted] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!selectedRange) return;
-
+  const fetchWordImage = (letter: string) => {
+    setLoading(true);
+    setError('');
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/login?message=Please login to access this feature';
       return;
     }
-
-    setLoading(true);
-    setError('');
-    
-    fetch(`${USER_LEARNING_API_BASE_URL}/api/words?range=${selectedRange}`, {
+    fetch(`${USER_LEARNING_API_BASE_URL}/api/word-image?letter=${letter}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -57,25 +66,42 @@ const WordFlashcard: React.FC = () => {
             window.location.href = '/login?message=Your session has expired. Please login again';
             throw new Error('Session expired');
           }
-          throw new Error(`Error fetching words: ${res.statusText}`);
+          throw new Error(`Error fetching word-image: ${res.statusText}`);
         }
         return res.json();
       })
-      .then((data: WordImage[]) => {
-        setWords(data);
-        setCurrentIndex(0);
+      .then((data: WordImage) => {
+        setCurrentWordImage(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        setError('Failed to load words');
-        setWords([]);
+        setError('Failed to load word-image');
+        setCurrentWordImage(null);
         setLoading(false);
       });
-  }, [selectedRange]);
+  };
+
+  const handleStart = () => {
+    const rangeLetters = getLettersInRange(selectedRange);
+    setLetters(rangeLetters);
+    setCurrentIndex(0);
+    setStarted(true);
+    fetchWordImage(rangeLetters[0]);
+  };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % words.length);
+    if (currentIndex < letters.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      fetchWordImage(letters[nextIndex]);
+    }
+  };
+
+  const highlightFirstLetter = (word: string, letter: string) => {
+    if (!word || !letter) return word;
+    const idx = word.toLowerCase().indexOf(letter.toLowerCase());
+    if (idx === -1) return word;
+    return <span>{word.slice(0, idx)}<span style={{ color: 'red', fontWeight: 'bold' }}>{word[idx]}</span>{word.slice(idx + 1)}</span>;
   };
 
   return (
@@ -88,6 +114,7 @@ const WordFlashcard: React.FC = () => {
         value={selectedRange}
         onChange={(e) => setSelectedRange(e.target.value)}
         sx={{ mb: 3, minWidth: 120 }}
+        disabled={started}
       >
         {ranges.map((range) => (
           <MenuItem key={range.value} value={range.value}>
@@ -96,38 +123,44 @@ const WordFlashcard: React.FC = () => {
         ))}
       </Select>
 
+      {!started && (
+        <Button variant="contained" onClick={handleStart} sx={{ mb: 3 }}>
+          Start
+        </Button>
+      )}
+
       {loading && <Typography>Loading...</Typography>}
       {error && <Typography color="error">{error}</Typography>}
 
-      {!loading && !error && words.length > 0 && (
+      {started && !loading && !error && currentWordImage && (
         <Card>
           <CardMedia
             component="img"
-            height="300"
-            image={words[currentIndex].imageUrl}
-            alt={words[currentIndex].word}
+            image={currentWordImage.imageUrl}
+            alt={currentWordImage.word}
+            sx={{ width: 200, height: 200, objectFit: 'contain', margin: '0 auto' }}
           />
           <CardContent>
-            <Typography variant="h6">{words[currentIndex].word}</Typography>
+            <Typography variant="h6">
+              {highlightFirstLetter(currentWordImage.word, letters[currentIndex])}
+            </Typography>
             <Typography color="text.secondary">
-              (Starts with: {words[currentIndex].letter})
+              (Starts with: {letters[currentIndex]})
             </Typography>
           </CardContent>
         </Card>
       )}
 
-      {!loading && !error && words.length === 0 && (
-        <Typography>No words found for this range.</Typography>
+      {started && !loading && !error && (
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          sx={{ mt: 2 }}
+          disabled={currentIndex >= letters.length - 1 || loading}
+        >
+          Next
+        </Button>
       )}
-
-      <Button
-        variant="contained"
-        onClick={handleNext}
-        sx={{ mt: 2 }}
-        disabled={words.length === 0 || loading}
-      >
-        Next
-      </Button>
     </Box>
   );
 };

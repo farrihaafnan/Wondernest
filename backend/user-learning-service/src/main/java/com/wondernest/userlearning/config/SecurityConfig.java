@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/sentence-learning/health").permitAll()
                 .requestMatchers("/api/sentence-learning/**").permitAll()
+                .requestMatchers("/api/word-image").permitAll()
                 .anyRequest().authenticated()
             .and()
             .formLogin().disable();
@@ -46,7 +47,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost", "http://localhost:80"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost", "http://localhost:80", "http://localhost:8080", "http://localhost:8081","http://localhost:8082"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
