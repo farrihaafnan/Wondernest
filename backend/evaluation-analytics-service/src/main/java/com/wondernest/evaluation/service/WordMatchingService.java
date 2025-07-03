@@ -1,22 +1,26 @@
 package com.wondernest.evaluation.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wondernest.evaluation.model.WordMatchingResult;
-import com.wondernest.evaluation.repository.WordMatchingResultRepository;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wondernest.evaluation.model.WordMatchingResult;
+import com.wondernest.evaluation.repository.WordMatchingResultRepository;
 
 @Service
 public class WordMatchingService {
@@ -61,7 +65,7 @@ public class WordMatchingService {
         try {
             String prompt = "A simple, clear photo of a " + word + ", white background, no text, no watermark.";
             String requestBody = "{\n" +
-                    "  \"model\": \"dall-e-3\",\n" +
+                    "  \"model\": \"dall-e-2\",\n" +
                     "  \"prompt\": \"" + prompt + "\",\n" +
                     "  \"n\": 1,\n" +
                     "  \"size\": \"256x256\"\n" +
@@ -87,7 +91,20 @@ public class WordMatchingService {
             if (data.isArray() && data.size() > 0) {
                 String imageUrl = data.get(0).path("url").asText();
                 System.out.println("[DALL-E] Image URL: " + imageUrl);
-                return imageUrl;
+
+                // Download the image and encode as base64
+                try {
+                    java.net.URL url = new java.net.URL(imageUrl);
+                    java.io.InputStream in = url.openStream();
+                    byte[] imageBytes = in.readAllBytes();
+                    in.close();
+                    String base64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
+                    return "data:image/png;base64," + base64;
+                } catch (Exception ex) {
+                    System.out.println("[DALL-E] Error downloading or encoding image: " + ex.getMessage());
+                    ex.printStackTrace();
+                    return "https://via.placeholder.com/400x300?text=No+Image";
+                }
             } else {
                 System.out.println("[DALL-E] No image data returned, using placeholder.");
                 return "https://via.placeholder.com/400x300?text=No+Image";

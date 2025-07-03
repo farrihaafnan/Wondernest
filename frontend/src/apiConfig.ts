@@ -7,11 +7,11 @@ export const USER_LEARNING_API_BASE_URL = isDevelopment
   ? "http://localhost:8081"  // Local development
   : "/api";                  // Production (proxied by Nginx)
 
-// export const EVALUATION_API_BASE_URL = isDevelopment 
-//   ? "http://localhost:8082"  // Local development
-//   : "/api";                  // Production (proxied by Nginx)
+export const EVALUATION_API_BASE_URL = isDevelopment 
+  ? "http://localhost:8082/api"  // Local development
+  : "/api";                  // Production (proxied by Nginx)
 
-export const EVALUATION_API_BASE_URL = "/api";
+//export const EVALUATION_API_BASE_URL = "/api";
 
 
 // For production, use:

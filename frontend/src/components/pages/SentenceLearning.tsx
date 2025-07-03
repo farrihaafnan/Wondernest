@@ -219,7 +219,7 @@ const SentenceLearning: React.FC = () => {
           <Card sx={{ mb: 3 }}>
             <CardMedia
               component="img"
-              height="400"
+              height="256"
               image={response.imageUrl}
               alt="Generated image"
               sx={{ objectFit: 'contain' }}
