@@ -8,7 +8,7 @@ const config = {
   workers: 1,
   use: {
     headless: true,
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000', // dynamic base URL
+    baseURL: 'http://localhost:3000', // dynamic base URL
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
