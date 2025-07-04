@@ -119,9 +119,7 @@ jobs:
           
       - name: Wait for All Services to be Ready
         run: |
-          npx wait-on http://localhost:3000 \
-                      http://localhost:8081/api/health \
-                      http://localhost:8082/api/health
+          npx wait-on http://localhost:3000 
 
 
       - name: Install Playwright Browsers
