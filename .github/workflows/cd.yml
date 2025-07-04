@@ -1,93 +1,93 @@
-name: Deploy to Azure VM
+# name: Deploy to Azure VM
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
       
-      - name: Wait for file system to stabilize
-        run: |
-          sleep 5
+#       - name: Wait for file system to stabilize
+#         run: |
+#           sleep 5
       
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
+#       - name: Set up SSH
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
       
-      - name: Add VM to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
+#       - name: Add VM to known hosts
+#         run: |
+#           mkdir -p ~/.ssh
+#           ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
       
-      - name: Test SSH connection
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "echo 'SSH connection successful'"
+#       - name: Test SSH connection
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "echo 'SSH connection successful'"
       
-      - name: Create deployment directory
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "mkdir -p ~/wondernest-deployment"
+#       - name: Create deployment directory
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "mkdir -p ~/wondernest-deployment"
       
-      - name: Copy project files
-        run: |
-          rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.github' --exclude='wondernest.tar.gz' ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
+#       - name: Copy project files
+#         run: |
+#           rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.github' --exclude='wondernest.tar.gz' ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
       
-      - name: Create environment file
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cat > ~/wondernest-deployment/.env << 'EOF'
-          SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
-          EOF"
+#       - name: Create environment file
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cat > ~/wondernest-deployment/.env << 'EOF'
+#           SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+#           SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+#           SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+#           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+#           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+#           OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+#           EOF"
       
-      - name: Stop existing containers
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rm -f user-learning-service wondernest-frontend || true"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rmi wondernest-deployment_user-learning-service wondernest-deployment_frontend || true"
+#       - name: Stop existing containers
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rm -f user-learning-service wondernest-frontend || true"
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rmi wondernest-deployment_user-learning-service wondernest-deployment_frontend || true"
       
-      - name: Build and deploy
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml up --build -d"
+#       - name: Build and deploy
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml up --build -d"
       
-      - name: Wait for services to start
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 30"
+#       - name: Wait for services to start
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 30"
       
-      - name: Check deployment status
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml ps"
+#       - name: Check deployment status
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml ps"
       
-      - name: Check service logs
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml logs --tail=20"
+#       - name: Check service logs
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml logs --tail=20"
       
-      - name: Check container details
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker ps -a"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs wondernest-frontend --tail=20 || echo 'Frontend container not found'"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'User Learning container not found'"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs evaluation-analytics-service --tail=20 || echo 'Evaluation analytics container not found'"
+#       - name: Check container details
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker ps -a"
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs wondernest-frontend --tail=20 || echo 'Frontend container not found'"
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'User Learning container not found'"
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs evaluation-analytics-service --tail=20 || echo 'Evaluation analytics container not found'"
       
-      - name: Check network connectivity
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "netstat -tlnp | grep :80 || echo 'Port 80 not listening'"
+#       - name: Check network connectivity
+#         run: |
+#           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "netstat -tlnp | grep :80 || echo 'Port 80 not listening'"
       
-      - name: Test frontend accessibility
-        run: |
-          curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
+#       - name: Test frontend accessibility
+#         run: |
+#           curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
       
-      - name: Test User Learning API
-        run: |
-          curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || echo "Backend API not accessible yet"
+#       - name: Test User Learning API
+#         run: |
+#           curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || echo "Backend API not accessible yet"
