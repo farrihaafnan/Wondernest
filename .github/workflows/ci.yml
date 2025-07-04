@@ -111,15 +111,11 @@ jobs:
           ./mvnw spring-boot:run &
           cd ../../backend/evaluation-analytics-service
           ./mvnw spring-boot:run &
-        # working-directory: ./ # ensures relative paths behave
-        # env:
-        #   SPRING_PROFILES_ACTIVE: test # if needed
 
-      - name: Start Frontend
+      - name: Serve Frontend
         run: |
-          cd frontend
-          npm install
-          npm run build
+          npm install -g serve
+          serve -s frontend/build -l 3000 &
           
       - name: Wait for All Services to be Ready
         run: |
