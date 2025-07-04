@@ -1,67 +1,3 @@
-# # File: .github/workflows/ci.yml
-
-# name: CI - Frontend & User Learning Service
-
-# on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
-
-# jobs:
-#   build-and-test:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name:  Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Set up Java 17
-#         uses: actions/setup-java@v3
-#         with:
-#           distribution: 'temurin'
-#           java-version: '17'
-
-#       - name: Set up Node.js 18
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: '18'
-
-#       - name:  Build & Test Backend (user-learning-service)
-#         run: |
-#           cd backend/user-learning-service
-#           ./mvnw clean install
-
-#       - name:  Build & Test Backend (evaluation-analytics-service)
-#         run: |
-#           cd backend/evaluation-analytics-service
-#           ./mvnw clean install
-
-#       - name:  Build Frontend
-#         run: |
-#           cd frontend
-#           npm install
-#           NODE_ENV=development CI='' npm run build
-
-#       - name: Install Playwright Browsers
-#         run: |
-#           cd e2e
-#           npx playwright install --with-deps
-
-#       - name: Run E2E Tests
-#         run: |
-#           cd e2e
-#           npm install
-#           NODE_ENV=development npx playwright test
-
-#       - name: Upload Playwright Report on Failure
-#         if: failure()
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: playwright-report
-#           path: e2e/playwright-report
-# File: .github/workflows/ci.yml
-
 name: CI - Frontend & User Learning Service
 
 on:
@@ -105,47 +41,47 @@ jobs:
           npm install
           CI='' npm run build
 
-      - name: Start user-learning-service
-        run: |
-          cd backend/user-learning-service
-          ./mvnw spring-boot:run -D'spring-boot.run.arguments=--spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }} --spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }} --spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }} --gemini.api.key=${{ secrets.GEMINI_API_KEY }} --openai.api.key=${{ secrets.OPENAI_API_KEY }} --openrouter.api.key=${{ secrets.OPENROUTER_API_KEY }}' &
-      
-      # - name: Start evaluation-analytics-service
+      # - name: Start user-learning-service
       #   run: |
-      #     cd backend/evaluation-analytics-service
+      #     cd backend/user-learning-service
       #     ./mvnw spring-boot:run -D'spring-boot.run.arguments=--spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }} --spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }} --spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }} --gemini.api.key=${{ secrets.GEMINI_API_KEY }} --openai.api.key=${{ secrets.OPENAI_API_KEY }} --openrouter.api.key=${{ secrets.OPENROUTER_API_KEY }}' &
-
-      - name: Serve Frontend
-        run: |
-          npm install -g serve
-          serve -s frontend/build -l 3000 &
       
-      - name: Wait for backend to be ready
-        run: |
-          npx wait-on http://localhost:8081/api/health
+      # # - name: Start evaluation-analytics-service
+      # #   run: |
+      # #     cd backend/evaluation-analytics-service
+      # #     ./mvnw spring-boot:run -D'spring-boot.run.arguments=--spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }} --spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }} --spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }} --gemini.api.key=${{ secrets.GEMINI_API_KEY }} --openai.api.key=${{ secrets.OPENAI_API_KEY }} --openrouter.api.key=${{ secrets.OPENROUTER_API_KEY }}' &
 
-      - name: Install Playwright Browsers
-        run: |
-          cd e2e
-          npx playwright install --with-deps
-
-      - name: Run E2E Tests
-        run: |
-          cd e2e
-          npm install
-          npx playwright test
-
-      - name: Upload Playwright Report on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: e2e/playwright-report
-
-      # - name: Show Backend Logs on Failure
-      #   if: failure()
+      # - name: Serve Frontend
       #   run: |
-      #     echo "===== User Learning Service Logs ====="
-      #     cat backend/user-learning-service/user-learning.log || true
-      #     echo "===== Evaluation Analytics Service Logs ====="
-      #     cat backend/evaluation-analytics-service/eval-analytics.log || true
+      #     npm install -g serve
+      #     serve -s frontend/build -l 3000 &
+      
+      # - name: Wait for backend to be ready
+      #   run: |
+      #     npx wait-on http://localhost:8081/api/health
+
+      # - name: Install Playwright Browsers
+      #   run: |
+      #     cd e2e
+      #     npx playwright install --with-deps
+
+      # - name: Run E2E Tests
+      #   run: |
+      #     cd e2e
+      #     npm install
+      #     npx playwright test
+
+      # - name: Upload Playwright Report on Failure
+      #   if: failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: playwright-report
+      #     path: e2e/playwright-report
+
+      # # - name: Show Backend Logs on Failure
+      # #   if: failure()
+      # #   run: |
+      # #     echo "===== User Learning Service Logs ====="
+      # #     cat backend/user-learning-service/user-learning.log || true
+      # #     echo "===== Evaluation Analytics Service Logs ====="
+      # #     cat backend/evaluation-analytics-service/eval-analytics.log || true
