@@ -108,7 +108,7 @@ jobs:
       - name: Start user-learning-service
         run: |
           cd backend/user-learning-service
-          ./mvnw spring-boot:run -D'spring-boot.run.arguments=--spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }} --spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }} --spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }} --gemini.api.key=${{ secrets.GEMINI_API_KEY }} --openai.api.key=${{ secrets.OPENAI_API_KEY }} --openrouter.api.key=${{ secrets.OPENROUTER_API_KEY }}' > user-learning.log 2>&1 &
+          ./mvnw spring-boot:run -D'spring-boot.run.arguments=--spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }} --spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }} --spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }} --gemini.api.key=${{ secrets.GEMINI_API_KEY }} --openai.api.key=${{ secrets.OPENAI_API_KEY }} --openrouter.api.key=${{ secrets.OPENROUTER_API_KEY }}' &
 
       - name: Serve Frontend
         run: |
