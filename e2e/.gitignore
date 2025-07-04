@@ -1,0 +1,4 @@
+# Ignore Playwright test output
+/test-results/
+/.cache/ 
+node_modules/

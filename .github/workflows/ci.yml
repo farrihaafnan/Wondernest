@@ -41,4 +41,22 @@ jobs:
         run: |
           cd frontend
           npm install
-          CI='' npm run build
+          NODE_ENV=development CI='' npm run build
+          
+      - name: Install Playwright Browsers
+        run: |
+          cd e2e
+          npx playwright install --with-deps
+
+      - name: Run E2E Tests
+        run: |
+          cd e2e
+          npm install
+          NODE_ENV=development npx playwright test
+
+      - name: Upload Playwright Report on Failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
