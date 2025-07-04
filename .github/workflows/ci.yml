@@ -118,7 +118,8 @@ jobs:
       - name: Start Frontend
         run: |
           cd frontend
-          npm start &
+          npm install
+          npm run build
           
       - name: Wait for All Services to be Ready
         run: |
