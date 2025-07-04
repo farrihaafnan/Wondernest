@@ -107,10 +107,12 @@ jobs:
 
       - name: Start Backend Services
         run: |
-          cd backend/user-learning-service
-          ./mvnw spring-boot:run &
-          cd ../../backend/evaluation-analytics-service
-          ./mvnw spring-boot:run &
+          cd e2e
+          npm install
+          npm run start:backends &
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
 
       - name: Serve Frontend
         run: |
