@@ -105,24 +105,30 @@ jobs:
           npm install
           NODE_ENV=development CI='' npm run build
 
-      - name: Start Backend Services
+      - name: Start Backend: User Learning Service
         run: |
-          cd e2e
-          npm install
-          npm run start:backends &
-        env:
-          SPRING_PROFILES_ACTIVE: test
+          cd backend/user-learning-service
+          ./mvnw spring-boot:run > user-learning.log 2>&1 &
+          echo $! > user-learning.pid
+        shell: bash
 
+      - name: Start Backend: Evaluation Analytics Service
+        run: |
+          cd backend/evaluation-analytics-service
+          ./mvnw spring-boot:run > eval-analytics.log 2>&1 &
+          echo $! > eval-analytics.pid
+        shell: bash
 
       - name: Serve Frontend
         run: |
           npm install -g serve
           serve -s frontend/build -l 3000 &
-          
+      
       - name: Wait for All Services to be Ready
         run: |
-          npx wait-on http://localhost:3000 
-
+          npx wait-on http://localhost:3000 \
+                      http://localhost:8081/api/health \
+                      http://localhost:8082/api/health
 
       - name: Install Playwright Browsers
         run: |
@@ -141,3 +147,11 @@ jobs:
         with:
           name: playwright-report
           path: e2e/playwright-report
+
+      - name: Show Backend Logs on Failure
+        if: failure()
+        run: |
+          echo "===== User Learning Service Logs ====="
+          cat backend/user-learning-service/user-learning.log || true
+          echo "===== Evaluation Analytics Service Logs ====="
+          cat backend/evaluation-analytics-service/eval-analytics.log || true
