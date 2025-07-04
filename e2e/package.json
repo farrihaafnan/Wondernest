@@ -4,9 +4,8 @@
   "description": "E2E tests for WonderNest project using Playwright",
   "scripts": {
     "test": "npx playwright test",
-    "prepare": "npx playwright install --with-deps",
-    "start:backends": "concurrently \"cd ../backend/user-learning-service && ./mvnw spring-boot:run\" \"cd ../backend/evaluation-analytics-service && ./mvnw spring-boot:run\""
-  },
+    "prepare": "npx playwright install --with-deps"
+     },
   "devDependencies": {
     "@playwright/test": "^1.41.2",
     "concurrently": "^8.2.0"
