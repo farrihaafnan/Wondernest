@@ -105,14 +105,14 @@ jobs:
           npm install
           NODE_ENV=development CI='' npm run build
 
-      - name: Start Backend: User Learning Service
+      - name: Start Backend-User Learning Service
         run: |
           cd backend/user-learning-service
           ./mvnw spring-boot:run > user-learning.log 2>&1 &
           echo $! > user-learning.pid
         shell: bash
 
-      - name: Start Backend: Evaluation Analytics Service
+      - name: Start Backend-Evaluation Analytics Service
         run: |
           cd backend/evaluation-analytics-service
           ./mvnw spring-boot:run > eval-analytics.log 2>&1 &
