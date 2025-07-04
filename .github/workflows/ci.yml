@@ -118,7 +118,7 @@ jobs:
       - name: Start Frontend
         run: |
           cd frontend
-          npm run dev &
+          npm start &
           
       - name: Wait for All Services to be Ready
         run: |
