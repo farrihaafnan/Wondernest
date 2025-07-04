@@ -94,16 +94,16 @@ jobs:
           cd backend/user-learning-service
           ./mvnw clean install
 
-      # - name: Build & Test Backend (evaluation-analytics-service)
-      #   run: |
-      #     cd backend/evaluation-analytics-service
-      #     ./mvnw clean install
+      - name: Build & Test Backend (evaluation-analytics-service)
+        run: |
+          cd backend/evaluation-analytics-service
+          ./mvnw clean install
 
       - name: Build Frontend
         run: |
           cd frontend
           npm install
-          NODE_ENV=development CI='' npm run build
+          CI='' npm run build
 
       - name: Start user-learning-service
         run: |
