@@ -109,7 +109,7 @@ jobs:
         run: |
           cd backend/user-learning-service
           ./mvnw spring-boot:run &
-          cd ../evaluation-analytics-service
+          cd ../../backend/evaluation-analytics-service
           ./mvnw spring-boot:run &
         # working-directory: ./ # ensures relative paths behave
         # env:
