@@ -24,8 +24,13 @@ frontend/src/
 │   │   └── Register.test.tsx
 │   ├── layout/__tests__/        # Layout component tests
 │   │   └── Navbar.test.tsx
-│   └── pages/__tests__/         # Page component tests
-│       └── WordMatching.test.tsx
+│   ├── pages/__tests__/         # Page component tests
+│   │   ├── WordMatching.test.tsx
+│   │   ├── StoryGenerator.test.tsx
+│   │   ├── SentenceLearning.test.tsx
+│   │   └── SentenceEvaluation.test.tsx
+│   └── wordflashcard/__tests__/ # Word flashcard component tests
+│       └── WordFlashcard.test.tsx
 └── contexts/__tests__/          # Context tests
     └── UserContext.test.tsx
 ```
