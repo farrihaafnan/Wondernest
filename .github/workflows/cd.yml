@@ -1,9 +1,6 @@
 name: Deploy to Azure VM
 
 on:
-  push:
-    branches:
-      - main
   workflow_run:
     workflows: ["CI"]
     types:
@@ -17,8 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' || 
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     
     steps:
       - name: Checkout code
