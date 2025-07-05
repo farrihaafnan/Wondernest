@@ -7,28 +7,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  wait-for-ci:
-    runs-on: ubuntu-latest
-    outputs:
-      ci-status: ${{ steps.wait.outputs.status }}
-    steps:
-      - name: Wait for CI to complete
-        id: wait
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.ref }}
-          check-name: 'build-and-test'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
   deploy:
-    needs: wait-for-ci
-    if: needs.wait-for-ci.outputs.ci-status == 'success'
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Wait for CI workflow to complete
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-ci
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'build-and-test'
+          ref: ${{ github.event.after || github.sha }}
+          timeoutSeconds: 1800  # 30 minutes
+          intervalSeconds: 30
+      
+      - name: Exit if CI failed
+        if: steps.wait-for-ci.outputs.conclusion != 'success'
+        run: |
+          echo "CI workflow failed or was cancelled"
+          exit 1
       
       - name: Wait for file system to stabilize
         run: |
