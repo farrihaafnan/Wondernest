@@ -39,35 +39,37 @@ const Navbar: React.FC = () => {
           >
             WonderNest
           </Typography>
-          <Box>
-            {isAuthenticated ? (
-              <>
-                <Button
-                  color="inherit"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  color="inherit"
-                  component={RouterLink}
-                  to="/login"
-                >
-                  Login
-                </Button>
-                <Button
-                  color="inherit"
-                  component={RouterLink}
-                  to="/register"
-                >
-                  Register
-                </Button>
-              </>
-            )}
-          </Box>
+          <nav role="navigation">
+            <Box>
+              {isAuthenticated ? (
+                <>
+                  <Button
+                    color="inherit"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    color="inherit"
+                    component={RouterLink}
+                    to="/login"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    color="inherit"
+                    component={RouterLink}
+                    to="/register"
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
+            </Box>
+          </nav>
         </Toolbar>
       </Container>
     </AppBar>
