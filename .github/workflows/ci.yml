@@ -35,6 +35,14 @@ jobs:
           cd backend/evaluation-analytics-service
           ./mvnw clean install
 
+      - name: Test Frontend
+        run: |
+          cd frontend
+          npm install
+          npm test -- --watchAll=false --coverage --passWithNoTests
+        env:
+          CI: true
+
       - name: Build Frontend
         run: |
           cd frontend

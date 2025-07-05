@@ -7,7 +7,23 @@ on:
   workflow_dispatch:
 
 jobs:
+  wait-for-ci:
+    runs-on: ubuntu-latest
+    outputs:
+      ci-status: ${{ steps.wait.outputs.status }}
+    steps:
+      - name: Wait for CI to complete
+        id: wait
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build-and-test'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
   deploy:
+    needs: wait-for-ci
+    if: needs.wait-for-ci.outputs.ci-status == 'success'
     runs-on: ubuntu-latest
     
     steps:
