@@ -39,9 +39,19 @@ jobs:
         run: |
           cd frontend
           npm install
-          npm test -- --watchAll=false --coverage --passWithNoTests
+          npm test -- --watchAll=false --coverage --passWithNoTests --silent --maxWorkers=2
         env:
           CI: true
+          # Suppress React warnings
+          REACT_APP_SUPPRESS_WARNINGS: true
+          # Suppress console warnings during tests
+          NODE_ENV: test
+          # Suppress specific React warnings
+          SUPPRESS_NO_HOOKS_WARNING: true
+          # Suppress MUI warnings
+          SUPPRESS_MUI_WARNINGS: true
+          # Add memory optimization for tests
+          NODE_OPTIONS: --max_old_space_size=4096
 
       - name: Build Frontend
         run: |
