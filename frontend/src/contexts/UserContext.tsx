@@ -24,8 +24,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedToken = localStorage.getItem('token');
     
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setToken(storedToken);
+      } catch (error) {
+        // Handle invalid JSON gracefully by clearing the corrupted data
+        console.warn('Invalid user data in localStorage, clearing...');
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
   }, []);
 

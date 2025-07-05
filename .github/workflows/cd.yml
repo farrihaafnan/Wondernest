@@ -14,6 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Wait for CI workflow to complete
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-ci
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: 'build-and-test'
+          ref: ${{ github.event.after || github.sha }}
+          timeoutSeconds: 1800  # 30 minutes
+          intervalSeconds: 30
+      
+      - name: Exit if CI failed
+        if: steps.wait-for-ci.outputs.conclusion != 'success'
+        run: |
+          echo "CI workflow failed or was cancelled"
+          exit 1
+      
       - name: Wait for file system to stabilize
         run: |
           sleep 5
@@ -54,8 +70,7 @@ jobs:
       - name: Stop existing containers
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rm -f user-learning-service wondernest-frontend || true"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker rmi wondernest-deployment_user-learning-service wondernest-deployment_frontend || true"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker system prune -f || true"
       
       - name: Build and deploy
         run: |
@@ -63,7 +78,9 @@ jobs:
       
       - name: Wait for services to start
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 30"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 45"
+          # Wait for services to be healthy
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "timeout 120 bash -c 'until docker ps | grep wondernest-frontend | grep -q Up; do sleep 5; done' || echo 'Frontend startup timeout'"
       
       - name: Check deployment status
         run: |
