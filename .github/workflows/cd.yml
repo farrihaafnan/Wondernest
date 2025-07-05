@@ -1,8 +1,11 @@
 name: Deploy to Azure VM
 
 on:
+  push:
+    branches:
+      - main
   workflow_run:
-    workflows: ["CI - Frontend & User Learning Service"]
+    workflows: ["CI"]
     types:
       - completed
     branches:
@@ -12,12 +15,60 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Only deploy if CI workflow succeeded
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Deploy if: manual trigger, or push to main, or successful CI workflow
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      github.event_name == 'push' || 
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Wait for CI if running in parallel
+        if: github.event_name == 'push'
+        run: |
+          echo "Waiting for CI to complete..."
+          sleep 30
+          
+          # Simple check using GitHub CLI
+          max_attempts=20
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt/$max_attempts: Checking CI status..."
+            
+            # Get the latest workflow run for CI
+            ci_status=$(gh run list --workflow=ci.yml --limit=1 --json status --jq '.[0].status' || echo "unknown")
+            ci_conclusion=$(gh run list --workflow=ci.yml --limit=1 --json conclusion --jq '.[0].conclusion' || echo "unknown")
+            
+            echo "CI Status: $ci_status, Conclusion: $ci_conclusion"
+            
+            if [ "$ci_status" = "completed" ]; then
+              if [ "$ci_conclusion" = "success" ]; then
+                echo "✅ CI completed successfully!"
+                break
+              else
+                echo "❌ CI failed with conclusion: $ci_conclusion"
+                exit 1
+              fi
+            elif [ "$ci_status" = "in_progress" ] || [ "$ci_status" = "queued" ] || [ "$ci_status" = "pending" ]; then
+              echo "⏳ CI is still running. Waiting..."
+              sleep 30
+              attempt=$((attempt + 1))
+            else
+              echo "⚠️ Unknown CI status: $ci_status"
+              sleep 30
+              attempt=$((attempt + 1))
+            fi
+          done
+          
+          if [ $attempt -gt $max_attempts ]; then
+            echo "⏰ Timeout waiting for CI to complete"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Wait for file system to stabilize
         run: |

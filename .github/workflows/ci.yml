@@ -1,4 +1,4 @@
-name: CI - Frontend & User Learning Service
+name: CI
 
 on:
   push:
