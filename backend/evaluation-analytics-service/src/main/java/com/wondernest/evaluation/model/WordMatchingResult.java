@@ -34,4 +34,32 @@ public class WordMatchingResult {
     public void setAttemptedAt(LocalDateTime attemptedAt) { this.attemptedAt = attemptedAt; }
     public String getLetterRange() { return letterRange; }
     public void setLetterRange(String letterRange) { this.letterRange = letterRange; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WordMatchingResult that = (WordMatchingResult) o;
+        return score == that.score &&
+                java.util.Objects.equals(id, that.id) &&
+                java.util.Objects.equals(childId, that.childId) &&
+                java.util.Objects.equals(letterRange, that.letterRange) &&
+                java.util.Objects.equals(attemptedAt, that.attemptedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(id, childId, letterRange, score, attemptedAt);
+    }
+
+    @Override
+    public String toString() {
+        return "WordMatchingResult{" +
+                "id=" + id +
+                ", childId=" + childId +
+                ", letterRange='" + letterRange + '\'' +
+                ", score=" + score +
+                ", attemptedAt=" + attemptedAt +
+                '}';
+    }
 } 
