@@ -21,4 +21,28 @@ public class WordImageResponse {
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WordImageResponse that = (WordImageResponse) o;
+        return java.util.Objects.equals(letter, that.letter) &&
+                java.util.Objects.equals(word, that.word) &&
+                java.util.Objects.equals(imageUrl, that.imageUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(letter, word, imageUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "WordImageResponse{" +
+                "letter='" + letter + '\'' +
+                ", word='" + word + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
+    }
 } 
