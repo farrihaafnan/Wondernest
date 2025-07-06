@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -13,12 +12,45 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RegisterRequestTest {
 
-    private static Validator validator;
+    private final Validator validator;
 
-    @BeforeAll
-    static void setUp() {
+    public RegisterRequestTest() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
+    }
+
+    @Test
+    public void testSettersAndGetters() {
+        RegisterRequest req = new RegisterRequest();
+        req.setEmail("test@example.com");
+        req.setPassword("password123");
+        assertEquals("test@example.com", req.getEmail());
+        assertEquals("password123", req.getPassword());
+    }
+
+    @Test
+    public void testValidation_invalidEmail() {
+        RegisterRequest req = new RegisterRequest();
+        req.setEmail("invalid");
+        req.setPassword("password123");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("email")));
+    }
+
+    @Test
+    public void testValidation_shortPassword() {
+        RegisterRequest req = new RegisterRequest();
+        req.setEmail("test@example.com");
+        req.setPassword("123");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("password")));
+    }
+
+    @Test
+    public void testValidation_blankFields() {
+        RegisterRequest req = new RegisterRequest();
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.size() >= 2); // Both fields required
     }
 
     @Test

@@ -29,4 +29,30 @@ public class SentenceCorrection {
     public void setScore(int score) { this.score = score; }
     public LocalDateTime getAttemptedAt() { return attemptedAt; }
     public void setAttemptedAt(LocalDateTime attemptedAt) { this.attemptedAt = attemptedAt; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SentenceCorrection that = (SentenceCorrection) o;
+        return score == that.score &&
+                java.util.Objects.equals(id, that.id) &&
+                java.util.Objects.equals(childId, that.childId) &&
+                java.util.Objects.equals(attemptedAt, that.attemptedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(id, childId, score, attemptedAt);
+    }
+
+    @Override
+    public String toString() {
+        return "SentenceCorrection{" +
+                "id=" + id +
+                ", childId=" + childId +
+                ", score=" + score +
+                ", attemptedAt=" + attemptedAt +
+                '}';
+    }
 } 
