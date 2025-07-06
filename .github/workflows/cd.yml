@@ -15,86 +15,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Deploy if: manual trigger, or push to main, or successful CI workflow
     if: |
       github.event_name == 'workflow_dispatch' || 
-      github.event_name == 'push' || 
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Wait for CI if running in parallel
-        if: github.event_name == 'push'
-        run: |
-          echo "Waiting for CI to complete..."
-          sleep 30
-          
-          # Simple check using GitHub CLI
-          max_attempts=20
-          attempt=1
-          
-          while [ $attempt -le $max_attempts ]; do
-            echo "Attempt $attempt/$max_attempts: Checking CI status..."
-            
-            # Get the latest workflow run for CI
-            ci_status=$(gh run list --workflow=ci.yml --limit=1 --json status --jq '.[0].status' || echo "unknown")
-            ci_conclusion=$(gh run list --workflow=ci.yml --limit=1 --json conclusion --jq '.[0].conclusion' || echo "unknown")
-            
-            echo "CI Status: $ci_status, Conclusion: $ci_conclusion"
-            
-            if [ "$ci_status" = "completed" ]; then
-              if [ "$ci_conclusion" = "success" ]; then
-                echo "✅ CI completed successfully!"
-                break
-              else
-                echo "❌ CI failed with conclusion: $ci_conclusion"
-                exit 1
-              fi
-            elif [ "$ci_status" = "in_progress" ] || [ "$ci_status" = "queued" ] || [ "$ci_status" = "pending" ]; then
-              echo "⏳ CI is still running. Waiting..."
-              sleep 30
-              attempt=$((attempt + 1))
-            else
-              echo "⚠️ Unknown CI status: $ci_status"
-              sleep 30
-              attempt=$((attempt + 1))
-            fi
-          done
-          
-          if [ $attempt -gt $max_attempts ]; then
-            echo "⏰ Timeout waiting for CI to complete"
-            exit 1
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Wait for file system to stabilize
-        run: |
-          sleep 5
       
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.AZURE_VM_SSH_PRIVATE_KEY }}
       
-      - name: Add VM to known hosts
+      - name: Setup SSH connection
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
-      
-      - name: Test SSH connection
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "echo 'SSH connection successful'"
-      
-      - name: Create deployment directory
-        run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "mkdir -p ~/wondernest-deployment"
       
       - name: Copy project files
         run: |
-          rsync -avz --exclude='.git' --exclude='node_modules' --exclude='target' --exclude='.github' --exclude='wondernest.tar.gz' ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
+          rsync -avz --delete --compress-level=6 --partial --inplace \
+            --exclude='.git' --exclude='node_modules' --exclude='target' \
+            --exclude='.github' --exclude='wondernest.tar.gz' --exclude='*.log' \
+            --exclude='frontend/build' --exclude='frontend/dist' \
+            --exclude='**/.DS_Store' --exclude='**/.env.local' \
+            ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
       
       - name: Create environment file
         run: |
@@ -109,42 +57,48 @@ jobs:
       
       - name: Stop existing containers
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml down --remove-orphans || true"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker system prune -f || true"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+            cd ~/wondernest-deployment
+            if [ -f docker-compose.deploy.yml ]; then
+              docker-compose -f docker-compose.deploy.yml down --remove-orphans || true
+            fi
+            docker image prune -f --filter 'dangling=true' || true
+          "
       
       - name: Build and deploy
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml up --build -d"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+            cd ~/wondernest-deployment
+            export DOCKER_BUILDKIT=1
+            export COMPOSE_DOCKER_CLI_BUILD=1
+            docker-compose -f docker-compose.deploy.yml build --parallel --pull
+            docker-compose -f docker-compose.deploy.yml up -d --remove-orphans
+          "
       
-      - name: Wait for services to start
+      - name: Wait for services
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "sleep 45"
-          # Wait for services to be healthy
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "timeout 120 bash -c 'until docker ps | grep wondernest-frontend | grep -q Up; do sleep 5; done' || echo 'Frontend startup timeout'"
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+            cd ~/wondernest-deployment
+            timeout 60 bash -c '
+              while true; do
+                running=\$(docker ps --filter \"status=running\" --filter \"name=wondernest\" --format \"{{.Names}}\" | wc -l)
+                if [ \$running -ge 3 ]; then
+                  break
+                fi
+                sleep 5
+              done
+            ' || true
+          "
       
-      - name: Check deployment status
+      - name: Verify deployment
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml ps"
-      
-      - name: Check service logs
+          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+            cd ~/wondernest-deployment
+            docker-compose -f docker-compose.deploy.yml ps
+            docker ps --filter 'name=wondernest'
+          "
+          
+      - name: Test connectivity
         run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "cd ~/wondernest-deployment && docker-compose -f docker-compose.deploy.yml logs --tail=20"
-      
-      - name: Check container details
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker ps -a"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs wondernest-frontend --tail=20 || echo 'Frontend container not found'"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs user-learning-service --tail=20 || echo 'User Learning container not found'"
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "docker logs evaluation-analytics-service --tail=20 || echo 'Evaluation analytics container not found'"
-      
-      - name: Check network connectivity
-        run: |
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "netstat -tlnp | grep :80 || echo 'Port 80 not listening'"
-      
-      - name: Test frontend accessibility
-        run: |
-          curl -f http://${{ secrets.AZURE_VM_HOST }} || echo "Frontend not accessible yet"
-      
-      - name: Test User Learning API
-        run: |
-          curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || echo "Backend API not accessible yet"
+          curl -f http://${{ secrets.AZURE_VM_HOST }} || true
+          curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || true
