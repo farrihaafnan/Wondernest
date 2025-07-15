@@ -40,14 +40,14 @@ CREATE TABLE puzzle_attempts (
 ); 
 
 
-CREATE TABLE stories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    child_id UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
-    prompt TEXT NOT NULL,
-    story_text TEXT NOT NULL,
-    image_urls TEXT[] NOT NULL,
-    title TEXT
-);
+-- CREATE TABLE stories (
+--     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--     child_id UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
+--     prompt TEXT NOT NULL,
+--     story_text TEXT NOT NULL,
+--     image_urls TEXT[] NOT NULL,
+--     title TEXT
+-- );
 
 CREATE TABLE word_matching (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
