@@ -1,0 +1,10 @@
+# Ignore HTML files in language stats
+*.html linguist-detectable=false
+
+# Optionally, highlight JavaScript or another language as dominant
+*.js linguist-language=JavaScript
+
+# Mark folders as documentation or vendor to exclude them from stats
+docs/** linguist-documentation
+vendor/** linguist-vendored
+examples/** linguist-examples
