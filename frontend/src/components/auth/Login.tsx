@@ -49,7 +49,7 @@ const Login: React.FC = () => {
       localStorage.setItem('user', JSON.stringify(data));
       localStorage.setItem('token', data.token);
 
-      navigate('/select-child');
+      navigate('/parent-options');
     } catch {
       setError('Invalid email or password');
     }

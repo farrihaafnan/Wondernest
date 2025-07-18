@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card, CardContent, Typography, Grid, Avatar, Button, Container,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, Box
 } from '@mui/material';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
@@ -68,6 +68,15 @@ const SelectChild: React.FC = () => {
     }
   };
 
+  const AVATAR_OPTIONS = [
+    '/avatars/avatar1.jpg',
+    '/avatars/avatar2.jpg',
+    '/avatars/avatar3.jpg',
+    '/avatars/avatar4.jpg',
+    '/avatars/avatar5.jpg',
+    '/avatars/avatar6.jpg',
+  ];
+
   return (
     <Container>
       <Typography variant="h4" gutterBottom>Select Your Child</Typography>
@@ -97,7 +106,25 @@ const SelectChild: React.FC = () => {
             <MenuItem value="Female">Female</MenuItem>
             <MenuItem value="Other">Other</MenuItem>
           </TextField>
-          <TextField fullWidth margin="dense" label="Avatar URL" value={newChild.avatarUrl} onChange={(e) => setNewChild({ ...newChild, avatarUrl: e.target.value })} />
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>Select Avatar</Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {AVATAR_OPTIONS.map((avatar) => (
+                <Avatar
+                  key={avatar}
+                  src={avatar}
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    border: newChild.avatarUrl === avatar ? '3px solid #1976d2' : '2px solid #ccc',
+                    cursor: 'pointer',
+                    transition: 'border 0.2s',
+                  }}
+                  onClick={() => setNewChild({ ...newChild, avatarUrl: avatar })}
+                />
+              ))}
+            </Box>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

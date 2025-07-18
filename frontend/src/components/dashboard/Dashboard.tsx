@@ -61,6 +61,7 @@ const Dashboard: React.FC = () => {
     { text: 'Word Matching', path: '/word-matching' },
     { text: 'Sentence Correction', path: '/sentence-evaluation' },
     { text: 'Puzzle', path: '/puzzle' },
+    { text: 'Edit Profile', path: '/edit-child-profile', isEdit: true },
   ];
 
   return (
@@ -73,9 +74,13 @@ const Dashboard: React.FC = () => {
             {menuItems.map((item) => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                  onClick={() =>
-                    navigate(item.path, { state: { parent: user, child: child } })
-                  }
+                  onClick={() => {
+                    if (item.isEdit) {
+                      navigate(item.path, { state: { parent: user, child: child } });
+                    } else {
+                      navigate(item.path, { state: { parent: user, child: child } });
+                    }
+                  }}
                 >
                   <ListItemText primary={item.text} />
                 </ListItemButton>

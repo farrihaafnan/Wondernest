@@ -13,6 +13,11 @@ import StoryGenerator from './components/pages/StoryGenerator';
 import SentenceLearning from './components/pages/SentenceLearning';
 import SentenceEvaluation from './components/pages/SentenceEvaluation';
 import WordMatching from './components/pages/WordMatching';
+import Puzzle from './components/pages/Puzzle';
+import ParentOptions from './components/pages/ParentOptions';
+import SelectChildForProgress from './components/pages/SelectChildForProgress';
+import ChildProgress from './components/pages/ChildProgress';
+import EditChildProfile from './components/dashboard/EditChildProfile';
 
 
 const App: React.FC = () => {
@@ -38,6 +43,11 @@ const App: React.FC = () => {
           <Route path="/sentence-learning" element={<SentenceLearning />} />
           <Route path="/sentence-evaluation" element={<SentenceEvaluation />} />
           <Route path="/word-matching" element={<WordMatching />} />
+          <Route path="/puzzle" element={<Puzzle />} />
+          <Route path="/parent-options" element={<ParentOptions />} />
+          <Route path="/select-child-progress" element={<SelectChildForProgress />} />
+          <Route path="/child-progress/:childId" element={<ChildProgress />} />
+          <Route path="/edit-child-profile" element={<EditChildProfile />} />
         </Routes>
       </Box>
     </Box>

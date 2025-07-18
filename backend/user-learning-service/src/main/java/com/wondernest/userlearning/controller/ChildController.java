@@ -48,4 +48,19 @@ public class ChildController {
                 .toList();
         return ResponseEntity.ok(childDtos);
     }
+
+    @PutMapping("/children/{childId}")
+    public ResponseEntity<?> updateChild(@PathVariable UUID childId, @RequestBody ChildRequest request) {
+        Optional<Child> childOpt = childRepository.findById(childId);
+        if (childOpt.isEmpty()) return ResponseEntity.notFound().build();
+        System.out.println("request.getName(): " + request.getName());
+        Child child = childOpt.get();
+        child.setName(request.getName());
+        child.setAge(request.getAge());
+        child.setGender(request.getGender());
+        child.setAvatarUrl(request.getAvatarUrl());
+        // Optionally: check parent id matches authenticated user
+
+        return ResponseEntity.ok(new ChildDto(childRepository.save(child)));
+    }
 }

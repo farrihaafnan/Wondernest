@@ -24,13 +24,14 @@ public class SecurityConfig {
             .cors().and() // 👈 this will now use the below bean
             .authorizeHttpRequests()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/children").permitAll()
+                .requestMatchers("/api/children/**").permitAll()
                 .requestMatchers("/api/parents/**").permitAll()
                 .requestMatchers("/api/story/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/sentence-learning/health").permitAll()
                 .requestMatchers("/api/sentence-learning/**").permitAll()
                 .requestMatchers("/api/word-image").permitAll()
+                .requestMatchers("/api/puzzle/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             .formLogin().disable();
