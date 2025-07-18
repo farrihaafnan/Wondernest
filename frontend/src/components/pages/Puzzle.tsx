@@ -36,6 +36,9 @@ const Puzzle: React.FC = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const touchStartRef = useRef<number | null>(null);
+  const touchOverIndexRef = useRef<number | null>(null);
+
   const state = location.state as any;
   const child: Child | null = state?.child || null;
   const parent: Parent | null = state?.parent || null;
@@ -145,6 +148,34 @@ const Puzzle: React.FC = () => {
     e.preventDefault();
   };
 
+  // ✅ Touch support
+  const handleTouchStart = (index: number) => {
+    if (!solved) {
+      touchStartRef.current = index;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    touchOverIndexRef.current = index;
+  };
+
+  const handleTouchEnd = () => {
+    if (
+      touchStartRef.current !== null &&
+      touchOverIndexRef.current !== null &&
+      touchStartRef.current !== touchOverIndexRef.current
+    ) {
+      const newPieces = [...pieces];
+      const from = touchStartRef.current;
+      const to = touchOverIndexRef.current;
+      [newPieces[from], newPieces[to]] = [newPieces[to], newPieces[from]];
+      setPieces(newPieces);
+    }
+    touchStartRef.current = null;
+    touchOverIndexRef.current = null;
+  };
+
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
       <Typography variant="h4" gutterBottom>Picture Puzzle</Typography>
@@ -187,6 +218,9 @@ const Puzzle: React.FC = () => {
                     onDragStart={() => handleDragStart(idx)}
                     onDrop={() => handleDrop(idx)}
                     onDragOver={handleDragOver}
+                    onTouchStart={() => handleTouchStart(idx)}
+                    onTouchMove={(e) => handleTouchMove(e, idx)}
+                    onTouchEnd={handleTouchEnd}
                     style={{ width: '100%', height: '100%' }}
                   >
                     <img
@@ -209,7 +243,6 @@ const Puzzle: React.FC = () => {
         </>
       )}
 
-      {/* 🎉 Congratulations Overlay */}
       {solved && (
         <Box sx={{
           position: 'fixed',
@@ -245,10 +278,7 @@ const Puzzle: React.FC = () => {
         </Box>
       )}
 
-
-      {/* 👏 Sound */}
       <audio ref={audioRef} src="/clap.mp3" preload="auto" />
-
     </Box>
   );
 };
