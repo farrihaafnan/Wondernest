@@ -35,6 +35,12 @@ jobs:
           cd backend/evaluation-analytics-service
           ./mvnw clean install
 
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          CI='' npm run build
+
       # - name: Test Frontend
       #   run: |
       #     cd frontend
@@ -53,11 +59,7 @@ jobs:
       #     # Add memory optimization for tests
       #     NODE_OPTIONS: --max_old_space_size=4096
 
-      - name: Build Frontend
-        run: |
-          cd frontend
-          npm install
-          CI='' npm run build
+      
 
       # - name: Start user-learning-service
       #   run: |
