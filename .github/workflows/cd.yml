@@ -40,7 +40,7 @@ jobs:
           rsync -avz --delete --compress-level=6 --partial --inplace \
             --exclude='.git' --exclude='node_modules' --exclude='target' \
             --exclude='.github' --exclude='wondernest.tar.gz' --exclude='*.log' \
-            --exclude='frontend/build' --exclude='frontend/dist' \
+            --exclude='frontend/dist' \
             --exclude='**/.DS_Store' --exclude='**/.env.local' \
             ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
       
@@ -67,13 +67,20 @@ jobs:
       
       - name: Build and deploy
         run: |
+          # ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
+          #   cd ~/wondernest-deployment
+          #   export DOCKER_BUILDKIT=1
+          #   export COMPOSE_DOCKER_CLI_BUILD=1
+          #   docker-compose -f docker-compose.deploy.yml build --parallel --pull
+          #   docker-compose -f docker-compose.deploy.yml up -d --remove-orphans
+          # "
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
-            cd ~/wondernest-deployment
-            export DOCKER_BUILDKIT=1
-            export COMPOSE_DOCKER_CLI_BUILD=1
-            docker-compose -f docker-compose.deploy.yml build --parallel --pull
-            docker-compose -f docker-compose.deploy.yml up -d --remove-orphans
+          cd ~/wondernest-deployment
+          docker network rm wondernest-deployment_wondernest-network || true
+          docker-compose -f docker-compose.deploy.yml build --pull
+          docker-compose -f docker-compose.deploy.yml up -d --remove-orphans --force-recreate
           "
+
       
       - name: Wait for services
         run: |
