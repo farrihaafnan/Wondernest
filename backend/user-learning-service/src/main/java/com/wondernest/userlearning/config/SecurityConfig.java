@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/sentence-learning/**").permitAll()
                 .requestMatchers("/api/word-image").permitAll()
                 .requestMatchers("/api/puzzle/**").permitAll()
+                .requestMatchers("/api/screen-time/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             .formLogin().disable();

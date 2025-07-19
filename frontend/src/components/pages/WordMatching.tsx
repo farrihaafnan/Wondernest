@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box, Button, Typography, Paper, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import axios from 'axios';
 import { EVALUATION_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 const LETTER_RANGES = ['A-E', 'F-J', 'K-O', 'P-T', 'U-Z'];
 
@@ -20,6 +21,17 @@ const WordMatching: React.FC = () => {
   const imageRefs = useRef<Array<HTMLDivElement | null>>(Array(5).fill(null));
   const wordRefs = useRef<Array<HTMLDivElement | null>>(Array(5).fill(null));
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Get current child ID from session storage (should be set when child is selected)
+  const selectedChild = JSON.parse(sessionStorage.getItem('selectedChild') || '{}');
+  const childId = selectedChild.id;
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: childId || '', 
+    activityType: 'word_match', 
+    isActive: images.length > 0 && !submitted && !!childId
+  });
   useEffect(() => {
     //fetchPairs();
   }, []);
