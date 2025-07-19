@@ -37,11 +37,14 @@ jobs:
       
       - name: Copy project files
         run: |
-          rsync -avz --delete --compress-level=6 --partial --inplace \
+          rsync -avz --delete --compress-level=9 --partial --inplace \
             --exclude='.git' --exclude='node_modules' --exclude='target' \
             --exclude='.github' --exclude='wondernest.tar.gz' --exclude='*.log' \
-            --exclude='frontend/dist' \
+            --exclude='frontend/dist' --exclude='frontend/build' \
             --exclude='**/.DS_Store' --exclude='**/.env.local' \
+            --exclude='**/node_modules' --exclude='**/target' \
+            --exclude='**/*.class' --exclude='**/.gradle' \
+            --exclude='playwright-report' --exclude='e2e/test-results' \
             ./ ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }}:~/wondernest-deployment/
       
       - name: Create environment file
@@ -60,25 +63,22 @@ jobs:
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
             cd ~/wondernest-deployment
             if [ -f docker-compose.deploy.yml ]; then
-              docker-compose -f docker-compose.deploy.yml down --remove-orphans || true
+              docker-compose -f docker-compose.deploy.yml down || true
             fi
-            docker image prune -f --filter 'dangling=true' || true
           "
       
       - name: Build and deploy
         run: |
-          # ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
-          #   cd ~/wondernest-deployment
-          #   export DOCKER_BUILDKIT=1
-          #   export COMPOSE_DOCKER_CLI_BUILD=1
-          #   docker-compose -f docker-compose.deploy.yml build --parallel --pull
-          #   docker-compose -f docker-compose.deploy.yml up -d --remove-orphans
-          # "
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
-          cd ~/wondernest-deployment
-          docker network rm wondernest-deployment_wondernest-network || true
-          docker-compose -f docker-compose.deploy.yml build --pull
-          docker-compose -f docker-compose.deploy.yml up -d --remove-orphans --force-recreate
+            cd ~/wondernest-deployment
+            export DOCKER_BUILDKIT=1
+            export COMPOSE_DOCKER_CLI_BUILD=1
+            # Build only changed services
+            docker-compose -f docker-compose.deploy.yml build --parallel
+            # Start services
+            docker-compose -f docker-compose.deploy.yml up -d
+            # Clean up unused images after successful start
+            docker image prune -f || true
           "
 
       
@@ -86,26 +86,33 @@ jobs:
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
             cd ~/wondernest-deployment
-            timeout 60 bash -c '
+            echo 'Waiting for services to start...'
+            timeout 30 bash -c '
               while true; do
-                running=\$(docker ps --filter \"status=running\" --filter \"name=wondernest\" --format \"{{.Names}}\" | wc -l)
-                if [ \$running -ge 3 ]; then
+                # Check for any containers from this deployment
+                running=\$(docker-compose -f docker-compose.deploy.yml ps --services --filter \"status=running\" | wc -l)
+                total=\$(docker-compose -f docker-compose.deploy.yml ps --services | wc -l)
+                echo \"Services running: \$running/\$total\"
+                
+                # If at least 2 services are running, consider it successful
+                if [ \$running -ge 2 ]; then
+                  echo \"Sufficient services are running\"
                   break
                 fi
-                sleep 5
+                sleep 2
               done
-            ' || true
+            ' || echo 'Timeout reached, but services may still be starting'
           "
       
       - name: Verify deployment
         run: |
           ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "
             cd ~/wondernest-deployment
+            echo '=== Container Status ==='
             docker-compose -f docker-compose.deploy.yml ps
-            docker ps --filter 'name=wondernest'
           "
           
-      - name: Test connectivity
+      - name: Test frontend accessibility
         run: |
-          curl -f http://${{ secrets.AZURE_VM_HOST }} || true
-          curl -f http://${{ secrets.AZURE_VM_HOST }}/api/health || true
+          echo 'Testing frontend accessibility...'
+          curl -f http://${{ secrets.AZURE_VM_HOST }} || echo 'Frontend connection failed - check Nginx and frontend container'

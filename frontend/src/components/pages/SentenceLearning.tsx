@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 interface Child {
   id: string;
@@ -42,6 +43,13 @@ const SentenceLearning: React.FC = () => {
   const [response, setResponse] = useState<SentenceLearningResponse | null>(null);
   const [showResult, setShowResult] = useState<boolean>(false);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: child?.id || '', 
+    activityType: 'sentence_learning', 
+    isActive: !!child?.id && (!!sentence || showResult || loading)
+  });
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
 import { EVALUATION_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 interface TestItem {
   original: string;
@@ -20,6 +21,17 @@ const SentenceEvaluation: React.FC = () => {
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [error, setError] = useState('');
+
+  // Get current child ID from session storage (should be set when child is selected)
+  const selectedChild = JSON.parse(sessionStorage.getItem('selectedChild') || '{}');
+  const childId = selectedChild.id;
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: childId || '', 
+    activityType: 'sentence_correction', 
+    isActive: testStarted && !testSubmitted && !!childId
+  });
 
   const fetchSentences = async () => {
     setLoading(true);

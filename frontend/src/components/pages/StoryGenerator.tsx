@@ -17,6 +17,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import { useLocation } from 'react-router-dom';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 interface Child {
   id: string;
@@ -39,6 +40,13 @@ const StoryGenerator: React.FC = () => {
   const [error, setError] = useState('');
   const [stories, setStories] = useState<StorySummary[]>([]);
   const [showStory, setShowStory] = useState(false);
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: child?.id || '', 
+    activityType: 'story_generation', 
+    isActive: !!child?.id && (!!prompt || showStory || loading)
+  });
 
   useEffect(() => {
     const state = location.state as { child: Child };
