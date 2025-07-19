@@ -41,8 +41,8 @@ describe('UserContext', () => {
       expect(screen.getByText('Test Child')).toBeInTheDocument();
     });
 
-    it('should initialize with no user when localStorage is empty', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+    it('should initialize with no user when sessionStorage is empty', () => {
+      (sessionStorage.getItem as jest.Mock).mockReturnValue(null);
 
       render(
         <UserProvider>
@@ -56,11 +56,11 @@ describe('UserContext', () => {
       expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
     });
 
-    it('should initialize with user data from localStorage', () => {
+    it('should initialize with user data from sessionStorage', () => {
       const mockUser = { id: '123', email: 'test@example.com' };
       const mockToken = 'test-token';
 
-      (localStorage.getItem as jest.Mock)
+      (sessionStorage.getItem as jest.Mock)
         .mockReturnValueOnce(JSON.stringify(mockUser)) // user
         .mockReturnValueOnce(mockToken); // token
 
@@ -76,8 +76,8 @@ describe('UserContext', () => {
       expect(screen.getByTestId('is-authenticated')).toHaveTextContent('true');
     });
 
-    it('should handle invalid JSON in localStorage gracefully', () => {
-      (localStorage.getItem as jest.Mock)
+    it('should handle invalid JSON in sessionStorage gracefully', () => {
+      (sessionStorage.getItem as jest.Mock)
         .mockReturnValueOnce('invalid-json') // user
         .mockReturnValueOnce('test-token'); // token
 
@@ -114,7 +114,7 @@ describe('UserContext', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should provide login function that updates state and localStorage', () => {
+    it('should provide login function that updates state and sessionStorage', () => {
       render(
         <UserProvider>
           <TestComponent />
@@ -132,13 +132,13 @@ describe('UserContext', () => {
       expect(screen.getByTestId('token')).toHaveTextContent('test-token');
       expect(screen.getByTestId('is-authenticated')).toHaveTextContent('true');
 
-      expect(localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify({ id: '123', email: 'test@example.com' }));
-      expect(localStorage.setItem).toHaveBeenCalledWith('token', 'test-token');
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify({ id: '123', email: 'test@example.com' }));
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('token', 'test-token');
     });
 
-    it('should provide logout function that clears state and localStorage', () => {
+    it('should provide logout function that clears state and sessionStorage', () => {
       // First login
-      (localStorage.getItem as jest.Mock)
+      (sessionStorage.getItem as jest.Mock)
         .mockReturnValueOnce(JSON.stringify({ id: '123', email: 'test@example.com' }))
         .mockReturnValueOnce('test-token');
 
@@ -159,8 +159,8 @@ describe('UserContext', () => {
       expect(screen.getByTestId('token')).toHaveTextContent('No token');
       expect(screen.getByTestId('is-authenticated')).toHaveTextContent('false');
 
-      expect(localStorage.removeItem).toHaveBeenCalledWith('user');
-      expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('user');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('token');
     });
 
     it('should update isAuthenticated based on user state', () => {

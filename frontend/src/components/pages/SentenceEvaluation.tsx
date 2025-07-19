@@ -76,8 +76,8 @@ const SentenceEvaluation: React.FC = () => {
       setScore(correctCount);
       setTestSubmitted(true);
       // Save result to backend
-      const selectedChild = localStorage.getItem('selectedChild');
-      console.log('[DEBUG] selectedChild from localStorage:', selectedChild);
+      const selectedChild = sessionStorage.getItem('selectedChild');
+      console.log('[DEBUG] selectedChild from sessionStorage:', selectedChild);
       if (selectedChild) {
         const childObj = JSON.parse(selectedChild);
         console.log('[DEBUG] childObj:', childObj);
@@ -97,7 +97,7 @@ const SentenceEvaluation: React.FC = () => {
           console.warn('[DEBUG] childObj.id is missing');
         }
       } else {
-        console.warn('[DEBUG] selectedChild is missing from localStorage');
+        console.warn('[DEBUG] selectedChild is missing from sessionStorage');
       }
     } catch (err) {
       setError('Failed to check corrections.');

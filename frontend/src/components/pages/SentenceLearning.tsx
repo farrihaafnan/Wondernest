@@ -44,8 +44,8 @@ const SentenceLearning: React.FC = () => {
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const storedUser = sessionStorage.getItem('user');
     if (!token || !storedUser) {
       navigate('/login?message=Please login to access this feature');
       return;
@@ -71,7 +71,7 @@ const SentenceLearning: React.FC = () => {
     setSentence('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`${USER_LEARNING_API_BASE_URL}/api/sentence-learning/generate-image`, {
         method: 'POST',
         headers: {
@@ -90,8 +90,8 @@ const SentenceLearning: React.FC = () => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
           navigate('/login?message=Your session has expired. Please login again');
           return;
         }
@@ -124,7 +124,7 @@ const SentenceLearning: React.FC = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const evaluationResponse = await fetch(`${USER_LEARNING_API_BASE_URL}/api/sentence-learning/evaluate`, {
         method: 'POST',
         headers: {
@@ -143,8 +143,8 @@ const SentenceLearning: React.FC = () => {
 
       if (!evaluationResponse.ok) {
         if (evaluationResponse.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
           navigate('/login?message=Your session has expired. Please login again');
           return;
         }
@@ -219,7 +219,7 @@ const SentenceLearning: React.FC = () => {
           <Card sx={{ mb: 3 }}>
             <CardMedia
               component="img"
-              height="256"
+              height="450"
               image={response.imageUrl}
               alt="Generated image"
               sx={{ objectFit: 'contain' }}

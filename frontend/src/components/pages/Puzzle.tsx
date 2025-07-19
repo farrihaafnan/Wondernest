@@ -33,9 +33,11 @@ const Puzzle: React.FC = () => {
   const [solved, setSolved] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [puzzleStarted, setPuzzleStarted] = useState<boolean>(false);
+  const [timeUp, setTimeUp] = useState<boolean>(false);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const touchStartRef = useRef<number | null>(null);
   const touchOverIndexRef = useRef<number | null>(null);
 
@@ -60,6 +62,7 @@ const Puzzle: React.FC = () => {
       pieces.every((url, idx) => url === puzzle.imageUrl[idx])
     ) {
       setSolved(true);
+      setPuzzleStarted(false);
       setMessage('🎉 Congratulations! Puzzle solved!');
       stopTimer();
       recordAttempt(true);
@@ -73,6 +76,8 @@ const Puzzle: React.FC = () => {
   useEffect(() => {
     if (timeLeft === 0 && puzzle && !solved) {
       setMessage('⏰ Time is up! Try again.');
+      setTimeUp(true);
+      setPuzzleStarted(false);
       recordAttempt(false);
       stopTimer();
     }
@@ -102,6 +107,7 @@ const Puzzle: React.FC = () => {
       if (data && (data.imageUrl || data.image_url)) {
         const imageUrl = data.imageUrl || data.image_url;
         setPuzzle(data);
+        setPuzzleStarted(true);
         const shuffled = [...imageUrl];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -127,9 +133,7 @@ const Puzzle: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ childId: child.id, puzzleId: puzzle.id, solved: isSolved }),
       });
-    } catch (e) {
-      // Silent catch
-    }
+    } catch (e) {}
   };
 
   const handleDragStart = (index: number) => {
@@ -148,7 +152,6 @@ const Puzzle: React.FC = () => {
     e.preventDefault();
   };
 
-  // ✅ Touch support
   const handleTouchStart = (index: number) => {
     if (!solved) {
       touchStartRef.current = index;
@@ -176,74 +179,86 @@ const Puzzle: React.FC = () => {
     touchOverIndexRef.current = null;
   };
 
+  const resetPuzzle = () => {
+    stopTimer();
+    setPuzzle(null);
+    setPieces([]);
+    setMessage('');
+    setSolved(false);
+    setPuzzleStarted(false);
+    setTimeUp(false);
+  };
+
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
       <Typography variant="h4" gutterBottom>Picture Puzzle</Typography>
 
       {message && <Alert severity={solved ? 'success' : 'info'} sx={{ mb: 2 }}>{message}</Alert>}
 
-      <Box sx={{ mb: 2 }}>
-        <Typography>Select Level:</Typography>
-        <Select value={level} onChange={(e) => setLevel(Number(e.target.value))} disabled={loading || !!puzzle}>
-          <MenuItem value={3}>3 x 3</MenuItem>
-          <MenuItem value={4}>4 x 4</MenuItem>
-        </Select>
-        <Button variant="contained" sx={{ ml: 2 }} onClick={fetchPuzzle} disabled={loading || !!puzzle || !child}>
-          Start Puzzle
-        </Button>
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {!puzzleStarted && !puzzle && (
+          <Box>
+            <Typography>Select Level:</Typography>
+            <Select value={level} onChange={(e) => setLevel(Number(e.target.value))}>
+              <MenuItem value={3}>3 x 3</MenuItem>
+              <MenuItem value={4}>4 x 4</MenuItem>
+            </Select>
+            <Button
+              variant="contained"
+              sx={{ ml: 2 }}
+              onClick={fetchPuzzle}
+              disabled={!child || loading}
+            >
+              Start Puzzle
+            </Button>
+          </Box>
+        )}
+
         {puzzle && (
-          <Button sx={{ ml: 2 }} onClick={() => {
-            stopTimer();
-            setPuzzle(null);
-            setPieces([]);
-            setMessage('');
-            setSolved(false);
-          }}>
-            Reset
-          </Button>
+          <>
+            <Button sx={{ mr: 2 }} onClick={resetPuzzle}>Reset</Button>
+            <Typography sx={{ fontWeight: 'bold' }}>
+              Time Left: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </Typography>
+          </>
         )}
       </Box>
 
       {puzzle && (
-        <>
-          <Typography>
-            Time Left: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-          </Typography>
-          <Box sx={{ mt: 2, mb: 2 }}>
-            <Grid container spacing={0.5}>
-              {pieces.map((url, idx) => (
-                <Grid item xs={12 / level} key={idx}>
-                  <div
-                    draggable={!solved}
-                    onDragStart={() => handleDragStart(idx)}
-                    onDrop={() => handleDrop(idx)}
-                    onDragOver={handleDragOver}
-                    onTouchStart={() => handleTouchStart(idx)}
-                    onTouchMove={(e) => handleTouchMove(e, idx)}
-                    onTouchEnd={handleTouchEnd}
-                    style={{ width: '100%', height: '100%' }}
-                  >
-                    <img
-                      src={url}
-                      loading="lazy"
-                      alt={`piece-${idx}`}
-                      style={{
-                        width: '100%',
-                        display: 'block',
-                        border: '1px solid #ccc',
-                        cursor: solved ? 'default' : 'grab',
-                        userSelect: 'none'
-                      }}
-                    />
-                  </div>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </>
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Grid container spacing={0.5}>
+            {pieces.map((url, idx) => (
+              <Grid item xs={12 / level} key={idx}>
+                <div
+                  draggable={!solved}
+                  onDragStart={() => handleDragStart(idx)}
+                  onDrop={() => handleDrop(idx)}
+                  onDragOver={handleDragOver}
+                  onTouchStart={() => handleTouchStart(idx)}
+                  onTouchMove={(e) => handleTouchMove(e, idx)}
+                  onTouchEnd={handleTouchEnd}
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  <img
+                    src={url}
+                    loading="lazy"
+                    alt={`piece-${idx}`}
+                    style={{
+                      width: '100%',
+                      display: 'block',
+                      border: '1px solid #ccc',
+                      cursor: solved ? 'default' : 'grab',
+                      userSelect: 'none'
+                    }}
+                  />
+                </div>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       )}
 
-      {solved && (
+      {(solved || timeUp) && (
         <Box sx={{
           position: 'fixed',
           top: 0,
@@ -260,21 +275,12 @@ const Puzzle: React.FC = () => {
           animation: 'fadeIn 0.5s ease-in-out'
         }}>
           <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}>
-            🎉 Congratulations! 🎉
+            {solved ? '🎉 Congratulations! 🎉' : '⏰ Time is Up!'}
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4 }}>You solved the puzzle!</Typography>
-          <Button
-            variant="contained"
-            onClick={() => {
-              stopTimer();
-              setPuzzle(null);
-              setPieces([]);
-              setMessage('');
-              setSolved(false);
-            }}
-          >
-            Close
-          </Button>
+          <Typography variant="h5" sx={{ mb: 4 }}>
+            {solved ? 'You solved the puzzle!' : 'Better luck next time!'}
+          </Typography>
+          <Button variant="contained" onClick={resetPuzzle}>Close</Button>
         </Box>
       )}
 

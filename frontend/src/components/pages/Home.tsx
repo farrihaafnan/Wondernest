@@ -157,9 +157,10 @@ const Home: React.FC = () => {
         {
           icon: '🎯',
           title: 'Pick Your Topic',
-          description: 'Choose what you want to learn — Math, Science, Stories and more!',
+          description: 'Choose what you want to learn — Vocabulary, Puzzle, Stories and more!',
         },
         {
+
           icon: '🤖',
           title: 'Smart Plan',
           description: 'WonderNest creates a fun learning path just for you!',
@@ -223,12 +224,17 @@ const Home: React.FC = () => {
         {
           title: 'Personalized Learning',
           description: 'Every child learns at their own pace with tailored AI-driven paths.',
-          image: '/mascot-pointing.svg',
+          image: '/mascot-friends.svg',
         },
         {
           title: 'Smart Insights',
           description: 'Track growth with fun visuals and helpful progress updates.',
           image: '/mascot-graph.svg',
+        },
+        {
+          title: 'Creative Confidence',
+          description: 'Help kids build confidence through challenges designed to unlock their inner genius.',
+          image: '/mascot-pointing.svg',
         },
       ].map((feature, index) => (
         <Grid item xs={12} md={4} key={index}>

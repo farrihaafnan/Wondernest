@@ -44,7 +44,7 @@ public class ChildController {
     public ResponseEntity<List<ChildDto>> getChildrenByParent(@PathVariable UUID parentId) {
         List<Child> children = childRepository.findByParentId(parentId);
         List<ChildDto> childDtos = children.stream()
-                .map(ChildDto::new)
+                .map(ChildDto::new)   
                 .toList();
         return ResponseEntity.ok(childDtos);
     }
@@ -59,7 +59,6 @@ public class ChildController {
         child.setAge(request.getAge());
         child.setGender(request.getGender());
         child.setAvatarUrl(request.getAvatarUrl());
-        // Optionally: check parent id matches authenticated user
 
         return ResponseEntity.ok(new ChildDto(childRepository.save(child)));
     }

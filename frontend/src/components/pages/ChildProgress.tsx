@@ -4,7 +4,7 @@ import { Container, Paper, Typography, Box } from '@mui/material';
 
 const ChildProgress: React.FC = () => {
   const { childId } = useParams();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const parentId = user.id;
 
   return (

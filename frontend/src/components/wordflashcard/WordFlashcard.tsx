@@ -48,7 +48,7 @@ const WordFlashcard: React.FC = () => {
   const fetchWordImage = (letter: string) => {
     setLoading(true);
     setError('');
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) {
       window.location.href = '/login?message=Please login to access this feature';
       return;
@@ -61,8 +61,8 @@ const WordFlashcard: React.FC = () => {
       .then((res) => {
         if (!res.ok) {
           if (res.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
             window.location.href = '/login?message=Your session has expired. Please login again';
             throw new Error('Session expired');
           }

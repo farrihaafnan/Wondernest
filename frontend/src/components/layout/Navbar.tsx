@@ -12,11 +12,11 @@ import SchoolIcon from '@mui/icons-material/School';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem('token');
+  const isAuthenticated = !!sessionStorage.getItem('token');
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
     navigate('/login?message=You have been logged out.');
   };
 

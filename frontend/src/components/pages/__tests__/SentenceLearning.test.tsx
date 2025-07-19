@@ -8,15 +8,15 @@ import SentenceLearning from '../SentenceLearning';
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-// Mock localStorage
-const mockLocalStorage = {
+// Mock sessionStorage
+const mocksessionStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
+Object.defineProperty(window, 'sessionStorage', {
+  value: mocksessionStorage,
   writable: true,
 });
 
@@ -59,7 +59,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('SentenceLearning Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLocalStorage.getItem.mockImplementation((key) => {
+    mocksessionStorage.getItem.mockImplementation((key) => {
       if (key === 'token') return 'mock-token';
       if (key === 'user') return JSON.stringify({ id: 'parent-123', name: 'Test Parent' });
       return null;
@@ -118,8 +118,8 @@ describe('SentenceLearning Component', () => {
   });
 
   it('should navigate to login when no token is available', async () => {
-    // Mock localStorage to return no token
-    mockLocalStorage.getItem.mockImplementation((key) => {
+    // Mock sessionStorage to return no token
+    mocksessionStorage.getItem.mockImplementation((key) => {
       if (key === 'token') return null;
       if (key === 'user') return null;
       return null;

@@ -5,8 +5,8 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 
-// Mock localStorage
-const localStorageMock = {
+// Mock sessionStorage
+const sessionStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
@@ -14,11 +14,11 @@ const localStorageMock = {
   length: 0,
   key: jest.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
   writable: true,
 });
-global.localStorage = localStorageMock as Storage;
+global.sessionStorage = sessionStorageMock as Storage;
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -88,10 +88,10 @@ jest.mock('react-router-dom', () => ({
 // Reset all mocks before each test
 beforeEach(() => {
   jest.clearAllMocks();
-  localStorageMock.getItem.mockClear();
-  localStorageMock.setItem.mockClear();
-  localStorageMock.removeItem.mockClear();
-  localStorageMock.clear.mockClear();
+  sessionStorageMock.getItem.mockClear();
+  sessionStorageMock.setItem.mockClear();
+  sessionStorageMock.removeItem.mockClear();
+  sessionStorageMock.clear.mockClear();
   sessionStorageMock.getItem.mockClear();
   sessionStorageMock.setItem.mockClear();
   sessionStorageMock.removeItem.mockClear();

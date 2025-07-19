@@ -8,15 +8,15 @@ import WordFlashcard from '../WordFlashcard';
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-// Mock localStorage
-const mockLocalStorage = {
+// Mock sessionStorage
+const mocksessionStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
+Object.defineProperty(window, 'sessionStorage', {
+  value: mocksessionStorage,
   writable: true,
 });
 
@@ -47,7 +47,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('WordFlashcard Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue('mock-token');
+    mocksessionStorage.getItem.mockReturnValue('mock-token');
     mockFetch.mockClear();
   });
 
@@ -143,13 +143,13 @@ describe('WordFlashcard Component', () => {
     });
 
     await waitFor(() => {
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('token');
-      expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('user');
+      expect(mocksessionStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(mocksessionStorage.removeItem).toHaveBeenCalledWith('user');
     });
   });
 
   it('should redirect to login when no token is present', async () => {
-    mockLocalStorage.getItem.mockReturnValue(null);
+    mocksessionStorage.getItem.mockReturnValue(null);
 
     render(
       <TestWrapper>

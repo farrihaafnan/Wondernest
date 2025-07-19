@@ -14,15 +14,15 @@ jest.mock('../../../apiConfig', () => ({
   EVALUATION_API_BASE_URL: 'http://localhost:8082/api',
 }));
 
-// Mock localStorage
-const mockLocalStorage = {
+// Mock sessionStorage
+const mocksessionStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
+Object.defineProperty(window, 'sessionStorage', {
+  value: mocksessionStorage,
   writable: true,
 });
 
@@ -41,7 +41,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('SentenceEvaluation Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue(JSON.stringify({
+    mocksessionStorage.getItem.mockReturnValue(JSON.stringify({
       id: 'child-123',
       name: 'Test Child',
       age: 8

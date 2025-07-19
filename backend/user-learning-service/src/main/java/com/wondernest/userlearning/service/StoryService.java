@@ -153,21 +153,63 @@ private String generateImageUrl(String prompt) throws IOException {
 
 
 
-    private String formatStoryHtml(StoryRequest req, String text, String img1, String img2) {
-        return """
-        <div>
-          <h2>A Story for %s</h2>
-          <img src='%s' style='width:50%%; margin: 16px 0;' />
-          <p>%s</p>
-          <img src='%s' style='width:50%%; margin: 16px 0;' />
-        </div>
-        """.formatted(
-                req.getChildName(),
-                img1,
-                text.replace("\n", "<br>"),
-                img2
-        );
+   private String formatStoryHtml(StoryRequest req, String text, String img1, String img2) {
+    String[] paragraphs = text.split("\n\n|\\r?\\n");
+
+    StringBuilder html = new StringBuilder();
+    html.append("<div style= line-height: 1.6; font-size: 18px;'>");
+    html.append("<h2 style='color: #320a47;'>A Story for ").append(req.getChildName()).append("</h2>");
+
+    for (int i = 0; i < paragraphs.length; ) {
+        // Group 3 paragraphs for image1
+        if (i == 2 && i + 3 <= paragraphs.length) {
+            String combined = String.format(
+                "<p>%s</p><p>%s</p><p>%s</p>",
+                paragraphs[i].trim(),
+                paragraphs[i + 1].trim(),
+                paragraphs[i + 2].trim()
+            );
+            html.append("""
+              <div style="display: flex; align-items: flex-start; gap: 24px; margin: 24px 0;">
+                <div style="flex: 1; text-align: justify;">%s</div>
+                <img src='%s' style='width: 40%%; max-width: 300px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' />
+              </div>
+            """.formatted(combined, img1));
+            i += 3; // Skip the grouped paragraphs
+        }
+        // Group 3 paragraphs for image2
+        else if (i == paragraphs.length / 2 && i + 3 <= paragraphs.length) {
+            String combined = String.format(
+                "<p>%s</p><p>%s</p><p>%s</p>",
+                paragraphs[i].trim(),
+                paragraphs[i + 1].trim(),
+                paragraphs[i + 2].trim()
+            );
+            html.append("""
+              <div style="display: flex; align-items: flex-start; gap: 24px; margin: 24px 0;">
+                <img src='%s' style='width: 40%%; max-width: 300px; height: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);' />
+                <div style="flex: 1; text-align: justify;">%s</div>
+              </div>
+            """.formatted(img2, combined));
+            i += 3;
+        }
+        // Regular paragraph
+        else {
+            String para = paragraphs[i].trim();
+            if (!para.isEmpty()) {
+                html.append("<p style='text-align: justify;'>").append(para).append("</p>");
+            }
+            i++;
+        }
     }
+
+    html.append("</div>");
+    return html.toString();
+}
+
+
+
+
 
     public Story saveStory(UUID childId, String prompt, String storyText) {
         Story story = new Story();

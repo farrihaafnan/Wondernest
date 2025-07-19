@@ -20,38 +20,28 @@ const WordMatching: React.FC = () => {
   const imageRefs = useRef<Array<HTMLDivElement | null>>(Array(5).fill(null));
   const wordRefs = useRef<Array<HTMLDivElement | null>>(Array(5).fill(null));
   const containerRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    //fetchPairs();
-  }, []);
-  
+    imageRefs.current = Array(5).fill(null);
+    wordRefs.current = Array(5).fill(null);
+  }, [images, words]);
 
   const fetchPairs = async () => {
-  setError('');
-  setSubmitted(false);
-  setMatches({});
-  setScore(null);
-  setSelected(null);
+    setError('');
+    setSubmitted(false);
+    setMatches({});
+    setScore(null);
+    setSelected(null);
 
-  try {
-    const resp = await axios.get(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/generate?letterRange=${letterRange}`);
-    const pairs: { word: string; imageUrl: string }[] = resp.data.correctPairs;
-
-    const shuffle = <T,>(array: T[]): T[] => {
-      return [...array].sort(() => Math.random() - 0.5);
-    };
-
-    const shuffledImages = shuffle(pairs.map((p: { imageUrl: string }) => p.imageUrl));
-    const shuffledWords = shuffle(pairs.map((p: { word: string }) => p.word));
-
-    setCorrectPairs(pairs); // correct order for scoring
-    setImages(shuffledImages);
-    setWords(shuffledWords);
-  } catch (err) {
-    setError('Failed to fetch data');
-  }
-};
-
-
+    try {
+      const resp = await axios.get(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/generate?letterRange=${letterRange}`);
+      setCorrectPairs(resp.data.correctPairs);
+      setImages(resp.data.images);
+      setWords(resp.data.words);
+    } catch (err) {
+      setError('Failed to fetch data');
+    }
+  };
 
   const handleSelect = (type: 'image' | 'word', index: number) => {
     if (selected?.type === type && selected.index === index) {
@@ -85,64 +75,43 @@ const WordMatching: React.FC = () => {
     const elRect = el.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     return {
-      x: elRect.left - containerRect.left + elRect.width / 2 -30 ,
-      y: elRect.top - containerRect.top + elRect.height/2 -170 ,
+      x: elRect.left - containerRect.left + elRect.width / 2 -30,
+      y: elRect.top - containerRect.top + elRect.height / 2 -100,
     };
   };
 
   const handleSubmit = async () => {
-  setError('');
-  setSubmitted(false);
+    const userMatches = Object.entries(matches).map(([imgIdx, wordIdx]) => ({
+      imageUrl: images[+imgIdx],
+      word: words[wordIdx]
+    }));
 
-  try {
-    const selectedChild = sessionStorage.getItem('selectedChild');
-    if (!selectedChild) {
-      setError('No child selected.');
-      return;
-    }
-
-    const childObj = JSON.parse(selectedChild);
-
-    // Build user matched pairs (actual image URL and selected word)
-    const userMatchedWords = Object.entries(matches).map(([imgIdxStr, wordIdx]) => {
-      const imgIdx = +imgIdxStr;
-      return {
-        imageUrl: images[imgIdx],
-        word: words[wordIdx]
-      };
-    });
-
-    // Score based on actual pair match
     let correct = 0;
-    for (const pair of correctPairs) {
-      if (userMatchedWords.find(p => p.imageUrl === pair.imageUrl && p.word === pair.word)) {
-        correct++;
-      }
+    for (const [imgIdx, wordIdx] of Object.entries(matches)) {
+      const correctMatch = correctPairs.find(p =>
+        p.imageUrl === images[+imgIdx] && p.word === words[wordIdx]
+      );
+      if (correctMatch) correct++;
     }
 
-    const payload = {
-      childId: childObj.id,
-      letterRange,
-      userMatches: userMatchedWords.map(p => p.word),
-      correctWords: correctPairs.map(p => p.word),
-      score: correct,
-    };
+    try {
+      const selectedChild = sessionStorage.getItem('selectedChild');
+      const child = selectedChild ? JSON.parse(selectedChild) : null;
 
-    console.log('[DEBUG] Submitting:', payload);
+      await axios.post(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/submit`, {
+        childId: child?.id,
+        letterRange,
+        userMatches: Object.values(matches).map(i => words[i]),
+        correctWords: correctPairs.map(p => p.word),
+        score: correct,
+      });
+    } catch (e) {
+      console.warn('Submit failed.');
+    }
 
-    const resp = await axios.post(`${EVALUATION_API_BASE_URL}/evaluation/word-matching/submit`, payload);
-
-    setScore(resp.data.score ?? correct);
+    setScore(correct);
     setSubmitted(true);
-    console.log('[DEBUG] Submit response:', resp.data);
-
-  } catch (err) {
-    console.error(err);
-    setError('Failed to submit results.');
-  }
-};
-
-
+  };
 
   return (
       <Box
@@ -156,31 +125,11 @@ const WordMatching: React.FC = () => {
           p: 4,
           borderRadius: 2,
         }}
-      > 
-        
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Letter Range</InputLabel>
-            <Select
-              value={letterRange}
-              label="Letter Range"
-              onChange={(e) => setLetterRange(e.target.value)}
-            >
-              {LETTER_RANGES.map((r) => (
-                <MenuItem key={r} value={r}>{r}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button variant="contained" onClick={fetchPairs}>
-            Generate
-          </Button>
-        </Box>
+      >
         <Typography variant="h5" gutterBottom>
-          Match the images and words!
+          Image-Word Matching with Lines
         </Typography>
-
+  
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, position: 'relative', gap: 50 }}>
           {/* SVG Lines */}
           <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
@@ -258,67 +207,7 @@ const WordMatching: React.FC = () => {
               );
             })}
           </Box>
-
         </Box>
-        {images.length > 0 && words.length > 0 && !submitted && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={Object.keys(matches).length < 5}
-            sx={{ mt: 3 }}
-          >
-            Submit
-          </Button>
-        )}
-        {submitted && score !== null && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              bgcolor: 'rgba(0, 0, 0, 0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999,
-            }}
-          >
-            <Box
-              sx={{
-                backgroundColor: 'white',
-                padding: 4,
-                borderRadius: 2,
-                textAlign: 'center',
-                width: 300,
-              }}
-            >
-              <Typography variant="h5" gutterBottom>
-                Your Score
-              </Typography>
-              <Typography variant="h4" color="primary" gutterBottom>
-                {score} / 5
-              </Typography>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => {
-                  setImages([]);
-                  setWords([]);
-                  setMatches({});
-                  setSubmitted(false);
-                  setScore(null);
-                  setSelected(null);
-                }}
-              >
-                Close
-              </Button>
-            </Box>
-          </Box>
-        )}
-
       </Box>
     );
   };

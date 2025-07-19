@@ -20,8 +20,8 @@ const SelectChild: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [newChild, setNewChild] = useState({ name: '', age: '', gender: '', avatarUrl: '' });
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const token = localStorage.getItem('token');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+  const token = sessionStorage.getItem('token');
 
   useEffect(() => {
     if (!token || !user?.id) {
@@ -38,7 +38,7 @@ const SelectChild: React.FC = () => {
   }, [navigate, token, user?.id]);
 
   const handleChildSelect = (child: Child) => {
-    localStorage.setItem('selectedChild', JSON.stringify(child));
+    sessionStorage.setItem('selectedChild', JSON.stringify(child));
     navigate('/dashboard', { state: { parent: user, child } });
   };
 

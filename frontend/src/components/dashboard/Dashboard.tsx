@@ -4,6 +4,8 @@ import {
   ListItemText, Toolbar, AppBar, Typography, Button, Alert
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Card, CardContent, CardMedia, Grid } from '@mui/material';
+
 
 interface Child {
   id: string;
@@ -28,8 +30,8 @@ const Dashboard: React.FC = () => {
   const [message, setMessage] = useState<string>('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const storedUser = sessionStorage.getItem('user');
     if (!token || !storedUser) {
       navigate('/login?message=Please login to access the dashboard');
       return;
@@ -48,11 +50,6 @@ const Dashboard: React.FC = () => {
     if (urlMessage) setMessage(urlMessage);
   }, [location, navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    navigate('/login?message=You have been logged out. Please login again to access the dashboard');
-  };
 
   const menuItems = [
     { text: 'Word Flashcards', path: '/wordflashcard' },
@@ -67,7 +64,7 @@ const Dashboard: React.FC = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <Drawer variant="permanent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth } }}>
+      <Drawer variant="permanent" sx={{ width: drawerWidth, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: drawerWidth ,  boxSizing: 'border-box', mt: '64px', height: 'calc(100vh - 64px)',} }}>
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
@@ -91,16 +88,50 @@ const Dashboard: React.FC = () => {
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
-        <Typography variant="h4">Welcome to Your Dashboard</Typography>
-        {user && child && (
-          <>
-            <Typography>Email: {user.email}</Typography>
-            <Typography>User ID: {user.id}</Typography>
-            <Typography>Selected Child: {child.name} (Age: {child.age})</Typography>
-          </>
-        )}
+        {child && (
+        <Typography variant="h4" sx={{ mb: 4 }}>
+          Hello, {child.name}!
+        </Typography>
+      )}
+
+      <Grid container spacing={3}>
+        {[
+          { title: 'Learn new words with flashcard and fun visuals !', path: '/wordflashcard', image: '/Word.png' },
+          { title: 'Understand sentence structure with engaging examples!', path: '/sentence-learning', image: '/SentenceLearning.png' },
+          { title: 'Create fun stories with cartoon illustrations!', path: '/story-generation', image: '/story.png' },
+          { title: 'Match words with their images in a playful way!', path: '/word-matching', image: '/match.png' },
+          { title: 'Fix grammar mistakes and learn proper sentence forms!', path: '/sentence-evaluation', image: '/correction.png' },
+          { title: 'Solve image puzzles to train your brain!', path: '/puzzle', image: '/puzzle.png' },
+        ].map((activity) => (
+          <Grid item xs={12} sm={6} md={4} key={activity.title}>
+            <Card
+              sx={{
+                borderRadius: 4,
+                boxShadow: 3,
+                textAlign: 'center',
+                cursor: 'pointer',
+                '&:hover': { boxShadow: 6, transform: 'scale(1.02)' },
+                transition: 'all 0.2s ease-in-out'
+              }}
+              onClick={() => navigate(activity.path, { state: { parent: user, child } })}
+            >
+              <CardMedia
+                component="img"
+                height="140"
+                image={activity.image}
+                alt={activity.title}
+                sx={{ objectFit: 'contain', mt: 2 }}
+              />
+              <CardContent>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' , textAlign: 'center',}}>
+                  {activity.title}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
       </Box>
     </Box>
   );

@@ -63,8 +63,8 @@ describe('Login Component', () => {
         </TestWrapper>
       );
 
-      expect(localStorage.removeItem).toHaveBeenCalledWith('user');
-      expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('user');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('token');
     });
 
     it('should display error message from URL parameters', () => {
@@ -161,8 +161,8 @@ describe('Login Component', () => {
       });
 
       await waitFor(() => {
-        expect(localStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUserData));
-        expect(localStorage.setItem).toHaveBeenCalledWith('token', 'mock-token');
+        expect(sessionStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUserData));
+        expect(sessionStorage.setItem).toHaveBeenCalledWith('token', 'mock-token');
         expect(mockNavigate).toHaveBeenCalledWith('/select-child');
       });
     });
@@ -192,7 +192,7 @@ describe('Login Component', () => {
         expect(screen.getByText('Invalid email or password')).toBeInTheDocument();
       });
 
-      expect(localStorage.setItem).not.toHaveBeenCalled();
+      expect(sessionStorage.setItem).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 

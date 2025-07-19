@@ -20,8 +20,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
+    const storedUser = sessionStorage.getItem('user');
+    const storedToken = sessionStorage.getItem('token');
     
     if (storedUser && storedToken) {
       try {
@@ -30,9 +30,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(storedToken);
       } catch (error) {
         // Handle invalid JSON gracefully by clearing the corrupted data
-        console.warn('Invalid user data in localStorage, clearing...');
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        console.warn('Invalid user data in sessionStorage, clearing...');
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('token');
       }
     }
   }, []);
@@ -40,15 +40,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (userData: User, newToken: string) => {
     setUser(userData);
     setToken(newToken);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('token', newToken);
+    sessionStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', newToken);
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
   };
 
   return (

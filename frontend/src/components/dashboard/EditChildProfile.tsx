@@ -16,7 +16,7 @@ const EditChildProfile: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const child = location.state?.child;
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
 
   const [form, setForm] = useState({
     name: child?.name || '',

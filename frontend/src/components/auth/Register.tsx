@@ -45,6 +45,11 @@ const Register: React.FC = () => {
       setError('Passwords do not match');
       return;
     }
+    if (formData.password.length < 8) {
+      setError('Passwords must be at least 8 characters long');
+      return;
+    }
+
 
     try {
       const response = await fetch(`${USER_LEARNING_API_BASE_URL}/api/auth/register`, {
@@ -59,11 +64,19 @@ const Register: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Registration failed');
+        const errorMessage = await response.text();
+        if (errorMessage.includes('Email already registered')) {
+          setError('This email is already registered.');
+        } else {
+          setError('Registration failed. Please try again.');
+        }
+        setFormData({ email: '', password: '', confirmPassword: '' });
+        return;
       }
 
       navigate('/login');
     } catch (err) {
+      setFormData({ email: '', password: '', confirmPassword: '' });
       setError('Registration failed. Please try again.');
     }
   };
@@ -142,6 +155,9 @@ const Register: React.FC = () => {
                 onChange={handleChange}
                 sx={{ backgroundColor: '#fff', borderRadius: 2 }}
               />
+              <Typography variant="caption" sx={{ mt: 1, ml: 0.5, color: 'error.main' }}>
+                Password must be at least 8 characters long
+              </Typography>
               <TextField
                 margin="normal"
                 required

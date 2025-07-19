@@ -42,7 +42,7 @@ describe('Navbar Component', () => {
     });
 
     it('should render login and register buttons when not authenticated', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      (sessionStorage.getItem as jest.Mock).mockReturnValue(null);
 
       render(
         <TestWrapper>
@@ -56,7 +56,7 @@ describe('Navbar Component', () => {
     });
 
     it('should render logout button when authenticated', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue('mock-token');
+      (sessionStorage.getItem as jest.Mock).mockReturnValue('mock-token');
 
       render(
         <TestWrapper>
@@ -85,7 +85,7 @@ describe('Navbar Component', () => {
     });
 
     it('should navigate to login page when login button is clicked', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      (sessionStorage.getItem as jest.Mock).mockReturnValue(null);
 
       render(
         <TestWrapper>
@@ -100,7 +100,7 @@ describe('Navbar Component', () => {
     });
 
     it('should navigate to register page when register button is clicked', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      (sessionStorage.getItem as jest.Mock).mockReturnValue(null);
 
       render(
         <TestWrapper>
@@ -117,7 +117,7 @@ describe('Navbar Component', () => {
 
   describe('Authentication', () => {
     it('should handle logout when logout button is clicked', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue('mock-token');
+      (sessionStorage.getItem as jest.Mock).mockReturnValue('mock-token');
 
       render(
         <TestWrapper>
@@ -128,13 +128,13 @@ describe('Navbar Component', () => {
       const logoutButton = screen.getByText('Logout');
       fireEvent.click(logoutButton);
 
-      expect(localStorage.removeItem).toHaveBeenCalledWith('user');
-      expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('user');
+      expect(sessionStorage.removeItem).toHaveBeenCalledWith('token');
       expect(mockNavigate).toHaveBeenCalledWith('/login?message=You have been logged out.');
     });
 
-    it('should check authentication status from localStorage', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue('mock-token');
+    it('should check authentication status from sessionStorage', () => {
+      (sessionStorage.getItem as jest.Mock).mockReturnValue('mock-token');
 
       render(
         <TestWrapper>
@@ -142,7 +142,7 @@ describe('Navbar Component', () => {
         </TestWrapper>
       );
 
-      expect(localStorage.getItem).toHaveBeenCalledWith('token');
+      expect(sessionStorage.getItem).toHaveBeenCalledWith('token');
     });
   });
 
@@ -160,7 +160,7 @@ describe('Navbar Component', () => {
     });
 
     it('should have proper button accessibility', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue('mock-token');
+      (sessionStorage.getItem as jest.Mock).mockReturnValue('mock-token');
 
       render(
         <TestWrapper>

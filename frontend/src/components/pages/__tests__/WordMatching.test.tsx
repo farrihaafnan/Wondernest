@@ -29,7 +29,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe('WordMatching Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (localStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify({
+    (sessionStorage.getItem as jest.Mock).mockReturnValue(JSON.stringify({
       id: 'child-123',
       name: 'Test Child',
       age: 8

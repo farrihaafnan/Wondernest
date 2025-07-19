@@ -129,7 +129,7 @@ expect(mockNavigate).toHaveBeenCalledWith('/expected-route');
 ## Mocking Strategy
 
 ### 1. Browser APIs
-- **localStorage/sessionStorage**: Mocked in `setupTests.ts`
+- **sessionStorage/sessionStorage**: Mocked in `setupTests.ts`
 - **fetch**: Mocked globally
 - **window.location**: Mocked for URL testing
 - **window.matchMedia**: Mocked for responsive design
@@ -165,7 +165,7 @@ Coverage reports are generated in the `coverage/` directory and include:
 ### 1. Authentication Components
 - **Login**: Form validation, API integration, error handling
 - **Register**: Password matching, API calls, navigation
-- **UserContext**: State management, localStorage integration
+- **UserContext**: State management, sessionStorage integration
 
 ### 2. Layout Components
 - **Navbar**: Authentication state, navigation, logout functionality
@@ -250,10 +250,10 @@ await waitFor(() => {
 ### 3. Authentication Testing
 ```typescript
 // Test authenticated state
-(localStorage.getItem as jest.Mock).mockReturnValue('mock-token');
+(sessionStorage.getItem as jest.Mock).mockReturnValue('mock-token');
 
 // Test unauthenticated state
-(localStorage.getItem as jest.Mock).mockReturnValue(null);
+(sessionStorage.getItem as jest.Mock).mockReturnValue(null);
 ```
 
 ## Troubleshooting

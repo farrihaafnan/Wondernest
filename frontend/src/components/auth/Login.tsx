@@ -19,8 +19,8 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     // Always clear auth state when login page is visited
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
 
     const params = new URLSearchParams(location.search);
     const message = params.get('message');
@@ -46,8 +46,8 @@ const Login: React.FC = () => {
       if (!response.ok) throw new Error('Login failed');
 
       const data = await response.json();
-      localStorage.setItem('user', JSON.stringify(data));
-      localStorage.setItem('token', data.token);
+      sessionStorage.setItem('user', JSON.stringify(data));
+      sessionStorage.setItem('token', data.token);
 
       navigate('/parent-options');
     } catch {
