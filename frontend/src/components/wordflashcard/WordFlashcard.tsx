@@ -10,6 +10,7 @@ import {
   CardContent,
 } from '@mui/material';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 const ranges = [
   { label: 'A-E', value: 'A-E' },
@@ -44,6 +45,17 @@ const WordFlashcard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [started, setStarted] = useState<boolean>(false);
+
+  // Get current child ID from session storage (should be set when child is selected)
+  const selectedChild = JSON.parse(sessionStorage.getItem('selectedChild') || '{}');
+  const childId = selectedChild.id;
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: childId || '', 
+    activityType: 'word_flashcard', 
+    isActive: started && !!childId 
+  });
 
   const fetchWordImage = (letter: string) => {
     setLoading(true);

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Box, Button, Typography, Select, MenuItem, Grid, Alert } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
+import { useScreenTimeTracker } from '../../hooks/useScreenTimeTracker';
 
 interface Child {
   id: string;
@@ -44,6 +45,13 @@ const Puzzle: React.FC = () => {
   const state = location.state as any;
   const child: Child | null = state?.child || null;
   const parent: Parent | null = state?.parent || null;
+
+  // Screen time tracking
+  useScreenTimeTracker({ 
+    childId: child?.id || '', 
+    activityType: 'picture_puzzle', 
+    isActive: puzzleStarted && !solved && !timeUp && !!child?.id 
+  });
 
   useEffect(() => {
     if (level === 3) {
