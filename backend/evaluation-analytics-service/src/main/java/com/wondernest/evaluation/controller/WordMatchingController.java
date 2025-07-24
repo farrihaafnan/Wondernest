@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wondernest.evaluation.model.WordMatchingResult;
 import com.wondernest.evaluation.service.WordMatchingService;
+import com.wondernest.evaluation.repository.WordMatchingResultRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/evaluation/word-matching")
@@ -34,6 +36,9 @@ import com.wondernest.evaluation.service.WordMatchingService;
 public class WordMatchingController {
     private static final Logger logger = LoggerFactory.getLogger(WordMatchingController.class);
     private final WordMatchingService wordMatchingService;
+
+    @Autowired
+    private WordMatchingResultRepository wordMatchingResultRepository;
 
     public WordMatchingController(WordMatchingService wordMatchingService) {
         this.wordMatchingService = wordMatchingService;
@@ -101,5 +106,12 @@ public class WordMatchingController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/word-matching")
+    public List<WordMatchingResult> getWordMatchingResultsByChild(@RequestParam UUID childId) {
+        return wordMatchingResultRepository.findAll().stream()
+            .filter(r -> r.getChildId().equals(childId))
+            .toList();
     }
 } 

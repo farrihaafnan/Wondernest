@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardMedia, Grid } from '@mui/material';
+import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 
 interface Child {
@@ -28,6 +29,9 @@ const Dashboard: React.FC = () => {
   const [user, setUser] = useState<Parent | null>(null);
   const [child, setChild] = useState<Child | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recLoading, setRecLoading] = useState(false);
+  const [recError, setRecError] = useState('');
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -41,6 +45,8 @@ const Dashboard: React.FC = () => {
     if (state?.parent && state?.child) {
       setUser(state.parent);
       setChild(state.child);
+      // Fetch recommendations
+      fetchRecommendations(state.child.id);
     } else {
       navigate('/select-child');
     }
@@ -50,6 +56,20 @@ const Dashboard: React.FC = () => {
     if (urlMessage) setMessage(urlMessage);
   }, [location, navigate]);
 
+  const fetchRecommendations = async (childId: string) => {
+    setRecLoading(true);
+    setRecError('');
+    try {
+      const res = await fetch(`${USER_LEARNING_API_BASE_URL}/api/recommendation/${childId}`);
+      if (!res.ok) throw new Error('Failed to fetch recommendations');
+      const data = await res.json();
+      setRecommendations(data);
+    } catch (err) {
+      setRecError('Could not load recommendations.');
+    } finally {
+      setRecLoading(false);
+    }
+  };
 
   const menuItems = [
     { text: 'Word Flashcards', path: '/wordflashcard' },
@@ -72,6 +92,9 @@ const Dashboard: React.FC = () => {
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
                   onClick={() => {
+                    if (child) {
+                      sessionStorage.setItem('selectedChild', JSON.stringify(child));
+                    }
                     if (item.isEdit) {
                       navigate(item.path, { state: { parent: user, child: child } });
                     } else {
@@ -94,6 +117,60 @@ const Dashboard: React.FC = () => {
         </Typography>
       )}
 
+      {/* Recommended Activities Section */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
+          Recommended For You
+        </Typography>
+        {recLoading ? (
+          <Alert severity="info">Loading recommendations...</Alert>
+        ) : recError ? (
+          <Alert severity="error">{recError}</Alert>
+        ) : (
+          <Grid container spacing={2}>
+            {recommendations.map((rec, idx) => (
+              <Grid item xs={12} sm={6} md={4} key={rec.activityType + idx}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: 2,
+                    cursor: 'pointer',
+                    background: '#e3f2fd',
+                    '&:hover': { boxShadow: 6, background: '#bbdefb' },
+                    transition: 'all 0.2s',
+                  }}
+                  onClick={() => {
+                    // Map activityType to path
+                    const pathMap: any = {
+                      word_match: '/word-matching',
+                      sentence_correction: '/sentence-evaluation',
+                      word_flashcard: '/wordflashcard',
+                      sentence_learning: '/sentence-learning',
+                      story_generation: '/story-generation',
+                      picture_puzzle: '/puzzle',
+                    };
+                    const path = pathMap[rec.activityType] || '/';
+                    if (child) {
+                      sessionStorage.setItem('selectedChild', JSON.stringify(child));
+                    }
+                    navigate(path, { state: { parent: user, child } });
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                      {rec.displayName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {rec.reason}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
+
       <Grid container spacing={3}>
         {[
           { title: 'Learn new words with flashcard and fun visuals !', path: '/wordflashcard', image: '/Word.png' },
@@ -113,7 +190,12 @@ const Dashboard: React.FC = () => {
                 '&:hover': { boxShadow: 6, transform: 'scale(1.02)' },
                 transition: 'all 0.2s ease-in-out'
               }}
-              onClick={() => navigate(activity.path, { state: { parent: user, child } })}
+              onClick={() => {
+                if (child) {
+                  sessionStorage.setItem('selectedChild', JSON.stringify(child));
+                }
+                navigate(activity.path, { state: { parent: user, child } });
+              }}
             >
               <CardMedia
                 component="img"

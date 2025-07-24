@@ -12,12 +12,18 @@ interface Child {
   avatarUrl?: string;
 }
 
+interface AvgScores {
+  wordMatchingAvg: number | null;
+  sentenceCorrectionAvg: number | null;
+}
+
 const ChildProgress: React.FC = () => {
   const { childId } = useParams();
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const parentId = user.id;
   const [child, setChild] = useState<Child | null>(null);
   const [screenTimeDialogOpen, setScreenTimeDialogOpen] = useState(false);
+  const [avgScores, setAvgScores] = useState<AvgScores>({ wordMatchingAvg: null, sentenceCorrectionAvg: null });
 
   useEffect(() => {
     // Fetch child data to display child name
@@ -42,7 +48,24 @@ const ChildProgress: React.FC = () => {
       }
     };
 
+    const fetchAvgScores = async () => {
+      try {
+        const res = await fetch(`${USER_LEARNING_API_BASE_URL}/api/progress/${childId}/avg-scores`);
+        if (res.ok) {
+          const data = await res.json();
+          setAvgScores({
+            wordMatchingAvg: data.wordMatchingAvg,
+            sentenceCorrectionAvg: data.sentenceCorrectionAvg
+          });
+          console.log('[DEBUG] Frontend avgScores:', data);
+        }
+      } catch (error) {
+        setAvgScores({ wordMatchingAvg: null, sentenceCorrectionAvg: null });
+      }
+    };
+
     fetchChildData();
+    if (childId) fetchAvgScores();
   }, [childId, parentId]);
 
   const handleViewScreenTime = () => {
@@ -78,6 +101,16 @@ const ChildProgress: React.FC = () => {
           <Box sx={{ mb: 3 }}>
             <Typography variant="body1" sx={{ mb: 1 }}>Parent ID: {parentId}</Typography>
             <Typography variant="body1" sx={{ mb: 3 }}>Child ID: {childId}</Typography>
+            {/* Avg scores display */}
+            <Typography variant="h6" sx={{ mt: 2, mb: 1, color: 'primary.main' }}>
+              Average Scores
+            </Typography>
+            <Typography variant="body1">
+              Word Matching: {avgScores.wordMatchingAvg !== null ? avgScores.wordMatchingAvg.toFixed(2) : 'N/A'}
+            </Typography>
+            <Typography variant="body1">
+              Sentence Correction: {avgScores.sentenceCorrectionAvg !== null ? avgScores.sentenceCorrectionAvg.toFixed(2) : 'N/A'}
+            </Typography>
           </Box>
 
           <Button

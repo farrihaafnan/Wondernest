@@ -1,6 +1,7 @@
 package com.wondernest.evaluation.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,13 @@ public class SentenceEvaluationController {
         return geminiService.generateIncorrectSentences(count);
     }
 //sentence-correction
+    @GetMapping("/sentence-correction/by-child")
+    public List<SentenceCorrection> getSentenceCorrectionResultsByChild(@RequestParam UUID childId) {
+        return sentenceCorrectionRepository.findAll().stream()
+            .filter(r -> r.getChildId().equals(childId))
+            .toList();
+    }
+
     @GetMapping("/sentence-correction")
     public List<SentenceCorrectionDTO> getAllSentenceCorrections() {
         return sentenceCorrectionRepository.findAll().stream().map( SentenceCorrectionDTO::fromEntity ).toList();
