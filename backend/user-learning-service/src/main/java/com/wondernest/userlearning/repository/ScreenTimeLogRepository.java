@@ -34,4 +34,10 @@ public interface ScreenTimeLogRepository extends JpaRepository<ScreenTimeLog, UU
     @Transactional
     @Query("DELETE FROM ScreenTimeLog s WHERE s.loggedAt < :sevenDaysAgo")
     void deleteOldScreenTimeLogs(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
+
+    /**
+     * Find screen time logs for a specific child between two dates
+     */
+    @Query("SELECT s FROM ScreenTimeLog s WHERE s.childId = :childId AND s.loggedAt >= :from AND s.loggedAt < :to ORDER BY s.loggedAt ASC")
+    List<ScreenTimeLog> findByChildIdAndLoggedAtBetween(@Param("childId") UUID childId, @Param("from") java.time.LocalDateTime from, @Param("to") java.time.LocalDateTime to);
 }
