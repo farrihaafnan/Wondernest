@@ -19,10 +19,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf().disable()
-            .cors().and() // 👈 this will now use the below bean
-            .authorizeHttpRequests()
+        return http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/children/**").permitAll()
                 .requestMatchers("/api/parents/**").permitAll()
@@ -39,10 +39,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/recommendation/**").permitAll()
 
                 .anyRequest().authenticated()
-            .and()
-            .formLogin().disable();
-
-        return http.build();
+            )
+            .formLogin(form -> form.disable())
+            .build();
     }
 
     @Bean

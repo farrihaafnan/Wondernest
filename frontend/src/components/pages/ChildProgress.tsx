@@ -155,26 +155,25 @@ const ChildProgress: React.FC = () => {
               📊 View Screen Time
             </Button>
 
-            {hasBehaviorFlags && (
-              <Button
-                variant="contained"
-                color="warning"
-                size="large"
-                onClick={handleViewBehaviorFlags}
-                sx={{
-                  px: 4,
-                  py: 2,
-                  fontWeight: 'bold',
-                  borderRadius: '30px',
-                  textTransform: 'none',
-                  fontSize: '1.1rem',
-                  width: '100%',
-                  maxWidth: '300px'
-                }}
-              >
-                🚩 Behavior Flags
-              </Button>
-            )}
+            {/* Always show behavior flags section */}
+            <Button
+              variant="contained"
+              color={hasBehaviorFlags ? "warning" : "success"}
+              size="large"
+              onClick={handleViewBehaviorFlags}
+              sx={{
+                px: 4,
+                py: 2,
+                fontWeight: 'bold',
+                borderRadius: '30px',
+                textTransform: 'none',
+                fontSize: '1.1rem',
+                width: '100%',
+                maxWidth: '300px'
+              }}
+            >
+              {hasBehaviorFlags ? "🚩 Behavior Flags" : "✅ No Inappropriate Behavior"}
+            </Button>
             
             <Button
               variant="contained"

@@ -110,13 +110,13 @@ const BehaviorFlagsDisplay: React.FC<BehaviorFlagsDisplayProps> = ({ childId, on
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold', textAlign: 'center' }}>
-        🚩 Behavior Flags Report
+        {behaviorFlags.length === 0 ? '✅ Behavior Report' : '🚩 Behavior Flags Report'}
       </Typography>
 
       {behaviorFlags.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="success.main" sx={{ mb: 2 }}>
-            ✅ No Behavior Flags Found
+            ✅ No Inappropriate Behavior Detected
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Great news! Your child has not used any inappropriate language in their activities.

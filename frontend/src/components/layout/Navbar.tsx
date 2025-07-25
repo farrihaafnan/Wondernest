@@ -45,6 +45,14 @@ const Navbar: React.FC = () => {
                 <>
                   <Button
                     color="inherit"
+                    component={RouterLink}
+                    to="/parent-options"
+                    sx={{ mr: 1 }}
+                  >
+                    Home Page
+                  </Button>
+                  <Button
+                    color="inherit"
                     onClick={handleLogout}
                   >
                     Logout

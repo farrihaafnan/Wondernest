@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,11 +22,14 @@ import static org.hamcrest.Matchers.hasItems;
 
 @WebMvcTest(WordMatchingController.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class WordMatchingControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private WordMatchingService wordMatchingService;
+    @MockBean
+    private com.wondernest.evaluation.repository.WordMatchingResultRepository wordMatchingResultRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
