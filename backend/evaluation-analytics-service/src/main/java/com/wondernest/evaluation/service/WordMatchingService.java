@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -122,5 +125,39 @@ public class WordMatchingService {
         result.setLetterRange(letterRange);
         result.setScore(score);
         return resultRepository.save(result);
+    }
+
+    public Map<String, Map<String, Double>> getWeeklyAveragesByRange(UUID childId) {
+        // Define the five ranges
+        String[] ranges = {"A-E", "F-J", "K-O", "P-T", "U-Z"};
+        Map<String, Map<String, Double>> result = new HashMap<>();
+        LocalDate today = LocalDate.now();
+        // Find the most recent Saturday (or today if today is Saturday)
+        LocalDate thisSaturday = today.with(java.time.DayOfWeek.SATURDAY);
+        if (today.getDayOfWeek() != java.time.DayOfWeek.SATURDAY && today.isBefore(thisSaturday)) {
+            thisSaturday = thisSaturday.minusWeeks(1);
+        }
+        LocalDate nextSaturday = thisSaturday.plusWeeks(1);
+        LocalDate lastSaturday = thisSaturday.minusWeeks(1);
+        LocalDateTime thisWeekStart = thisSaturday.atStartOfDay();
+        LocalDateTime nextWeekStart = nextSaturday.atStartOfDay();
+        LocalDateTime lastWeekStart = lastSaturday.atStartOfDay();
+        LocalDateTime thisWeekEnd = nextWeekStart.minusSeconds(1);
+        LocalDateTime lastWeekEnd = thisWeekStart.minusSeconds(1);
+        for (String range : ranges) {
+            // This week
+            List<WordMatchingResult> thisWeekResults = resultRepository.findByChildIdAndLetterRangeAndAttemptedAtBetween(
+                childId, range, thisWeekStart, thisWeekEnd);
+            double thisWeekAvg = thisWeekResults.isEmpty() ? 0.0 : thisWeekResults.stream().mapToInt(WordMatchingResult::getScore).average().orElse(0.0);
+            // Last week
+            List<WordMatchingResult> lastWeekResults = resultRepository.findByChildIdAndLetterRangeAndAttemptedAtBetween(
+                childId, range, lastWeekStart, lastWeekEnd);
+            double lastWeekAvg = lastWeekResults.isEmpty() ? 0.0 : lastWeekResults.stream().mapToInt(WordMatchingResult::getScore).average().orElse(0.0);
+            Map<String, Double> rangeMap = new HashMap<>();
+            rangeMap.put("thisWeek", thisWeekAvg);
+            rangeMap.put("lastWeek", lastWeekAvg);
+            result.put(range, rangeMap);
+        }
+        return result;
     }
 } 
