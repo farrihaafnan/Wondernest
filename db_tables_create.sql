@@ -70,8 +70,9 @@ CREATE TABLE behavior_flags (
     child_id UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
     activity_type TEXT NOT NULL,         
     submitted_text TEXT NOT NULL,        
-    offensive_words TEXT[] NOT NULL,     
-    flagged_at TIMESTAMP DEFAULT NOW()
+    offensive_words TEXT NOT NULL,     
+    flagged_at TIMESTAMP DEFAULT NOW(),
+    is_seen BOOLEAN DEFAULT FALSE
 );
 
 

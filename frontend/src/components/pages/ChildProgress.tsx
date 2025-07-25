@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Paper, Typography, Box, Button, Dialog, DialogContent } from '@mui/material';
 import ScreenTimeDisplay from '../dashboard/ScreenTimeDisplay';
+import BehaviorFlagsDisplay from '../dashboard/BehaviorFlagsDisplay';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 
 interface Child {
@@ -18,9 +19,11 @@ const ChildProgress: React.FC = () => {
   const parentId = user.id;
   const [child, setChild] = useState<Child | null>(null);
   const [screenTimeDialogOpen, setScreenTimeDialogOpen] = useState(false);
+  const [behaviorFlagsDialogOpen, setBehaviorFlagsDialogOpen] = useState(false);
+  const [hasBehaviorFlags, setHasBehaviorFlags] = useState(false);
 
   useEffect(() => {
-    // Fetch child data to display child name
+    // Fetch child data to display child name and check behavior flags
     const fetchChildData = async () => {
       try {
         const token = sessionStorage.getItem('token');
@@ -37,6 +40,18 @@ const ChildProgress: React.FC = () => {
             setChild(currentChild);
           }
         }
+
+        // Check if child has behavior flags
+        if (childId) {
+          const behaviorResponse = await fetch(`${USER_LEARNING_API_BASE_URL}/api/behavior-flags/child/${childId}/exists`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (behaviorResponse.ok) {
+            const hasFlags = await behaviorResponse.json();
+            setHasBehaviorFlags(hasFlags);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch child data:', error);
       }
@@ -51,6 +66,14 @@ const ChildProgress: React.FC = () => {
 
   const handleCloseScreenTime = () => {
     setScreenTimeDialogOpen(false);
+  };
+
+  const handleViewBehaviorFlags = () => {
+    setBehaviorFlagsDialogOpen(true);
+  };
+
+  const handleCloseBehaviorFlags = () => {
+    setBehaviorFlagsDialogOpen(false);
   };
 
   if (!childId) {
@@ -80,22 +103,45 @@ const ChildProgress: React.FC = () => {
             <Typography variant="body1" sx={{ mb: 3 }}>Child ID: {childId}</Typography>
           </Box>
 
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleViewScreenTime}
-            sx={{
-              px: 4,
-              py: 2,
-              fontWeight: 'bold',
-              borderRadius: '30px',
-              textTransform: 'none',
-              fontSize: '1.1rem'
-            }}
-          >
-            📊 View Screen Time
-          </Button>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handleViewScreenTime}
+              sx={{
+                px: 4,
+                py: 2,
+                fontWeight: 'bold',
+                borderRadius: '30px',
+                textTransform: 'none',
+                fontSize: '1.1rem',
+                minWidth: '200px'
+              }}
+            >
+              📊 View Screen Time
+            </Button>
+
+            {hasBehaviorFlags && (
+              <Button
+                variant="contained"
+                color="warning"
+                size="large"
+                onClick={handleViewBehaviorFlags}
+                sx={{
+                  px: 4,
+                  py: 2,
+                  fontWeight: 'bold',
+                  borderRadius: '30px',
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  minWidth: '200px'
+                }}
+              >
+                🚩 Behavior Flags
+              </Button>
+            )}
+          </Box>
         </Paper>
       </Container>
 
@@ -112,6 +158,23 @@ const ChildProgress: React.FC = () => {
           <ScreenTimeDisplay
             childId={childId}
             onClose={handleCloseScreenTime}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={behaviorFlagsDialogOpen}
+        onClose={handleCloseBehaviorFlags}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 4 }
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <BehaviorFlagsDisplay
+            childId={childId}
+            onClose={handleCloseBehaviorFlags}
           />
         </DialogContent>
       </Dialog>

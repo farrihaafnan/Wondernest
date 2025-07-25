@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wondernest.userlearning.dto.SentenceLearningRequest;
 import com.wondernest.userlearning.dto.SentenceLearningResponse;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -60,19 +61,40 @@ public class SentenceLearningService {
                 );
             }
             
+            // Check for inappropriate content in the sentence
+            boolean hasInappropriateWords = false;
+            try {
+                var behaviorFlag = behaviorFlagService.checkAndFlagInappropriateContent(
+                    request.getChildId(), 
+                    "sentence_learning", 
+                    request.getSentence()
+                );
+                hasInappropriateWords = (behaviorFlag != null);
+            } catch (Exception e) {
+                System.err.println("[SentenceLearning] Error checking inappropriate content: " + e.getMessage());
+                // Continue with normal processing even if behavior flag checking fails
+            }
+            
             // Evaluate the sentence using Gemini
             String evaluationResult = evaluateSentence(request.getSentence(), imageDescription, request.getChildAge());
             
             // Parse the evaluation result
             SentenceEvaluation evaluation = parseEvaluationResult(evaluationResult);
             
-            return new SentenceLearningResponse(
+            // Create response with separate inappropriate words warning if detected
+            SentenceLearningResponse response = new SentenceLearningResponse(
                 imageUrl,
-                evaluation.feedback,
+                evaluation.feedback, // Keep original feedback separate
                 evaluation.isCorrect,
                 evaluation.correctedSentence,
                 imageDescription
             );
+            
+            if (hasInappropriateWords) {
+                response.setInappropriateWordsWarning("Inappropriate words detected! Please use kind and appropriate language. Remember to choose words that are respectful and positive!");
+            }
+            
+            return response;
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,6 +107,9 @@ public class SentenceLearningService {
             );
         }
     }
+
+    @Autowired
+    private BehaviorFlagService behaviorFlagService;
 
     public SentenceLearningResponse evaluateSentenceOnly(SentenceLearningRequest request) {
         try {
@@ -109,19 +134,40 @@ public class SentenceLearningService {
                 );
             }
             
+            // Check for inappropriate content in the sentence
+            boolean hasInappropriateWords = false;
+            try {
+                var behaviorFlag = behaviorFlagService.checkAndFlagInappropriateContent(
+                    request.getChildId(), 
+                    "sentence_learning", 
+                    request.getSentence()
+                );
+                hasInappropriateWords = (behaviorFlag != null);
+            } catch (Exception e) {
+                System.err.println("[SentenceLearning] Error checking inappropriate content: " + e.getMessage());
+                // Continue with normal processing even if behavior flag checking fails
+            }
+            
             // Evaluate the sentence using Gemini with the provided image description
             String evaluationResult = evaluateSentence(request.getSentence(), request.getImageDescription(), request.getChildAge());
             
             // Parse the evaluation result
             SentenceEvaluation evaluation = parseEvaluationResult(evaluationResult);
             
-            return new SentenceLearningResponse(
+            // Create response with separate inappropriate words warning if detected
+            SentenceLearningResponse response = new SentenceLearningResponse(
                 null, // No new image URL needed
-                evaluation.feedback,
+                evaluation.feedback, // Keep original feedback separate
                 evaluation.isCorrect,
                 evaluation.correctedSentence,
                 request.getImageDescription()
             );
+            
+            if (hasInappropriateWords) {
+                response.setInappropriateWordsWarning("Inappropriate words detected! Please use kind and appropriate language. Remember to choose words that are respectful and positive!");
+            }
+            
+            return response;
             
         } catch (IOException e) {
             e.printStackTrace();

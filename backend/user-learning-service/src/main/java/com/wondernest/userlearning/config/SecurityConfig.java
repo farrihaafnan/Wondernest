@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/word-image").permitAll()
                 .requestMatchers("/api/puzzle/**").permitAll()
                 .requestMatchers("/api/screen-time/**").permitAll()
+                .requestMatchers("/api/behavior-flags/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             .formLogin().disable();
