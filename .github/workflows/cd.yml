@@ -32,8 +32,13 @@ jobs:
       - name: Setup SSH connection
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts
-          ssh ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "mkdir -p ~/wondernest-deployment"
+          chmod 700 ~/.ssh
+          # Add host to known_hosts with better error handling
+          ssh-keyscan -H ${{ secrets.AZURE_VM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || echo "Host key scan failed, continuing..."
+          chmod 644 ~/.ssh/known_hosts
+          
+          # Test SSH connection with timeout
+          ssh -o ConnectTimeout=30 -o BatchMode=yes ${{ secrets.AZURE_VM_USER }}@${{ secrets.AZURE_VM_HOST }} "echo 'SSH connection successful' && mkdir -p ~/wondernest-deployment"
       
       - name: Copy project files
         run: |
