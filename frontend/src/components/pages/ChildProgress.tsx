@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Paper, Typography, Box, Button, Dialog, DialogContent } from '@mui/material';
 import ScreenTimeDisplay from '../dashboard/ScreenTimeDisplay';
+import BehaviorFlagsDisplay from '../dashboard/BehaviorFlagsDisplay';
 import { USER_LEARNING_API_BASE_URL } from '../../apiConfig';
 import { EVALUATION_API_BASE_URL } from '../../apiConfig';
 
@@ -19,6 +20,8 @@ const ChildProgress: React.FC = () => {
   const parentId = user.id;
   const [child, setChild] = useState<Child | null>(null);
   const [screenTimeDialogOpen, setScreenTimeDialogOpen] = useState(false);
+  const [behaviorFlagsDialogOpen, setBehaviorFlagsDialogOpen] = useState(false);
+  const [hasBehaviorFlags, setHasBehaviorFlags] = useState(false);
   const [scoreDialogOpen, setScoreDialogOpen] = useState(false);
   const [wordMatchingScores, setWordMatchingScores] = useState<any>(null);
   const [sentenceCorrectionScores, setSentenceCorrectionScores] = useState<any>(null);
@@ -26,7 +29,7 @@ const ChildProgress: React.FC = () => {
   const [scoreError, setScoreError] = useState('');
 
   useEffect(() => {
-    // Fetch child data to display child name
+    // Fetch child data to display child name and check behavior flags
     const fetchChildData = async () => {
       try {
         const token = sessionStorage.getItem('token');
@@ -41,6 +44,18 @@ const ChildProgress: React.FC = () => {
           const currentChild = children.find((c: Child) => c.id === childId);
           if (currentChild) {
             setChild(currentChild);
+          }
+        }
+
+        // Check if child has behavior flags
+        if (childId) {
+          const behaviorResponse = await fetch(`${USER_LEARNING_API_BASE_URL}/api/behavior-flags/child/${childId}/exists`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (behaviorResponse.ok) {
+            const hasFlags = await behaviorResponse.json();
+            setHasBehaviorFlags(hasFlags);
           }
         }
       } catch (error) {
@@ -79,6 +94,14 @@ const ChildProgress: React.FC = () => {
 
   const handleCloseScreenTime = () => {
     setScreenTimeDialogOpen(false);
+  };
+
+  const handleViewBehaviorFlags = () => {
+    setBehaviorFlagsDialogOpen(true);
+  };
+
+  const handleCloseBehaviorFlags = () => {
+    setBehaviorFlagsDialogOpen(false);
   };
 
   const handleViewScore = () => {
@@ -131,6 +154,27 @@ const ChildProgress: React.FC = () => {
             >
               📊 View Screen Time
             </Button>
+
+            {hasBehaviorFlags && (
+              <Button
+                variant="contained"
+                color="warning"
+                size="large"
+                onClick={handleViewBehaviorFlags}
+                sx={{
+                  px: 4,
+                  py: 2,
+                  fontWeight: 'bold',
+                  borderRadius: '30px',
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  width: '100%',
+                  maxWidth: '300px'
+                }}
+              >
+                🚩 Behavior Flags
+              </Button>
+            )}
             
             <Button
               variant="contained"
@@ -167,6 +211,23 @@ const ChildProgress: React.FC = () => {
           <ScreenTimeDisplay
             childId={childId}
             onClose={handleCloseScreenTime}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={behaviorFlagsDialogOpen}
+        onClose={handleCloseBehaviorFlags}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 4 }
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <BehaviorFlagsDisplay
+            childId={childId}
+            onClose={handleCloseBehaviorFlags}
           />
         </DialogContent>
       </Dialog>
@@ -247,4 +308,4 @@ const ChildProgress: React.FC = () => {
   );
 };
 
-export default ChildProgress; 
+export default ChildProgress;

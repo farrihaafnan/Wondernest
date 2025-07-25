@@ -6,6 +6,7 @@ public class SentenceLearningResponse {
     private boolean isCorrect;
     private String correctedSentence;
     private String imageDescription;
+    private String inappropriateWordsWarning; // New field for warning message
 
     public SentenceLearningResponse() {}
 
@@ -15,6 +16,16 @@ public class SentenceLearningResponse {
         this.isCorrect = isCorrect;
         this.correctedSentence = correctedSentence;
         this.imageDescription = imageDescription;
+        this.inappropriateWordsWarning = null;
+    }
+
+    public SentenceLearningResponse(String imageUrl, String feedback, boolean isCorrect, String correctedSentence, String imageDescription, String inappropriateWordsWarning) {
+        this.imageUrl = imageUrl;
+        this.feedback = feedback;
+        this.isCorrect = isCorrect;
+        this.correctedSentence = correctedSentence;
+        this.imageDescription = imageDescription;
+        this.inappropriateWordsWarning = inappropriateWordsWarning;
     }
 
     public String getImageUrl() {
@@ -55,5 +66,13 @@ public class SentenceLearningResponse {
 
     public void setImageDescription(String imageDescription) {
         this.imageDescription = imageDescription;
+    }
+
+    public String getInappropriateWordsWarning() {
+        return inappropriateWordsWarning;
+    }
+
+    public void setInappropriateWordsWarning(String inappropriateWordsWarning) {
+        this.inappropriateWordsWarning = inappropriateWordsWarning;
     }
 } 

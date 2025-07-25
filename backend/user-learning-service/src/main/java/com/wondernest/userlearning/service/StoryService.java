@@ -40,9 +40,28 @@ public class StoryService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private StoryRepository storyRepository;
+    @Autowired
+    private BehaviorFlagService behaviorFlagService;
 
     public String generateStoryHtml(StoryRequest request) {
         try {
+            // Check for inappropriate content in the prompt
+            try {
+                var behaviorFlag = behaviorFlagService.checkAndFlagInappropriateContent(
+                    request.getChildId(), 
+                    "story_generation", 
+                    request.getPrompt()
+                );
+                
+                // If inappropriate words detected, stop story generation
+                if (behaviorFlag != null) {
+                    return generateInappropriateContentResponse();
+                }
+            } catch (Exception e) {
+                System.err.println("[StoryService] Error checking inappropriate content: " + e.getMessage());
+                // Continue with normal processing even if behavior flag checking fails
+            }
+            
             String storyText = generateStoryText(request);
             String image1Url = generateImageUrl(request.getPrompt() + "cartoon scene");
             String image2Url = generateImageUrl("cute fantasy illustration of  " + request.getPrompt());
@@ -221,6 +240,27 @@ private String generateImageUrl(String prompt) throws IOException {
 
     public List<Story> getStoriesByChild(UUID childId) {
         return storyRepository.findByChildId(childId);
+    }
+
+    private String generateInappropriateContentResponse() {
+        return """
+            <div style="text-align: center; padding: 40px; font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin: 20px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">🚫</div>
+                <h2 style="color: #ffeb3b; margin-bottom: 20px;">Oops! Inappropriate Words Detected</h2>
+                <p style="font-size: 18px; margin-bottom: 15px; line-height: 1.6;">
+                    We noticed some words in your prompt that aren't appropriate for story time.
+                </p>
+                <p style="font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
+                    Please try again with a different prompt using kind and friendly words! 
+                    Remember, the best stories come from positive and creative ideas! ✨
+                </p>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <p style="font-size: 14px; margin: 0;">
+                        💡 <strong>Tip:</strong> Try prompts about adventures, magical places, friendly animals, or fun activities!
+                    </p>
+                </div>
+            </div>
+            """;
     }
 
 }

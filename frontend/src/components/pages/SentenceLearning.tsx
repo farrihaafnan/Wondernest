@@ -31,6 +31,7 @@ interface SentenceLearningResponse {
   isCorrect: boolean;
   correctedSentence: string | null;
   imageDescription: string;
+  inappropriateWordsWarning: string | null;
 }
 
 const SentenceLearning: React.FC = () => {
@@ -43,6 +44,7 @@ const SentenceLearning: React.FC = () => {
   const [response, setResponse] = useState<SentenceLearningResponse | null>(null);
   const [showResult, setShowResult] = useState<boolean>(false);
   const [imageGenerated, setImageGenerated] = useState<boolean>(false);
+  const [inappropriateWarning, setInappropriateWarning] = useState<string>('');
 
   // Screen time tracking
   useScreenTimeTracker({ 
@@ -75,6 +77,7 @@ const SentenceLearning: React.FC = () => {
 
     setLoading(true);
     setError('');
+    setInappropriateWarning(''); // Clear inappropriate words warning when generating new image
     setShowResult(false);
     setSentence('');
 
@@ -160,6 +163,14 @@ const SentenceLearning: React.FC = () => {
       }
 
       const data: SentenceLearningResponse = await evaluationResponse.json();
+      
+      // Check for inappropriate words warning
+      if (data.inappropriateWordsWarning) {
+        setInappropriateWarning(data.inappropriateWordsWarning);
+        // Auto-hide the warning after 6 seconds
+        setTimeout(() => setInappropriateWarning(''), 6000);
+      }
+      
       // Preserve the existing image URL since evaluation doesn't return a new image
       setResponse({
         ...data,
@@ -180,6 +191,7 @@ const SentenceLearning: React.FC = () => {
     setShowResult(false);
     setImageGenerated(false);
     setError('');
+    setInappropriateWarning(''); // Clear inappropriate words warning
   };
 
   if (!child) {
@@ -203,6 +215,23 @@ const SentenceLearning: React.FC = () => {
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {inappropriateWarning && (
+        <Alert 
+          severity="warning" 
+          sx={{ 
+            mb: 2,
+            backgroundColor: '#fff3cd',
+            borderColor: '#ffeb3b',
+            '& .MuiAlert-icon': {
+              color: '#ff9800'
+            }
+          }}
+          onClose={() => setInappropriateWarning('')}
+        >
+          🚫 {inappropriateWarning}
         </Alert>
       )}
 
@@ -255,7 +284,13 @@ const SentenceLearning: React.FC = () => {
                 multiline
                 rows={3}
                 value={sentence}
-                onChange={(e) => setSentence(e.target.value)}
+                onChange={(e) => {
+                  setSentence(e.target.value);
+                  // Clear inappropriate words warning when user starts typing
+                  if (inappropriateWarning) {
+                    setInappropriateWarning('');
+                  }
+                }}
                 placeholder="Write a sentence about what you see in the image..."
                 variant="outlined"
                 sx={{ mb: 2 }}

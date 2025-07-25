@@ -4,8 +4,8 @@ WonderNest is an interactive, AI-powered educational platform designed for child
 
 ## Features
 
-- Parent and Child Profile Management
-- AI-Powered Story Generation
+- Parent and Child Profile Management 
+- AI-Powered Story Generation 
 - Word Flashcards
 - Picture Puzzles
 - Sentence Correction and Learning
@@ -22,7 +22,7 @@ WonderNest is an interactive, AI-powered educational platform designed for child
 - Containerization: Docker
 - CI/CD: GitHub Actions
 
-## Project Structure
+## Project Structure 
 
 ```
 CSE408/
