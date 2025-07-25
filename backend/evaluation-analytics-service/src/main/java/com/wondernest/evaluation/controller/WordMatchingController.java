@@ -102,4 +102,9 @@ public class WordMatchingController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/weekly-averages")
+    public Map<String, Map<String, Double>> getWeeklyAveragesByRange(@RequestParam UUID childId) {
+        return wordMatchingService.getWeeklyAveragesByRange(childId);
+    }
 } 

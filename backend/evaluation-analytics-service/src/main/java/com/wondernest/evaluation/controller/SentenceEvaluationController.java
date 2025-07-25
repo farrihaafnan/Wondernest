@@ -1,6 +1,11 @@
 package com.wondernest.evaluation.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +76,31 @@ public class SentenceEvaluationController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Failed to save sentence correction: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/sentence-correction/weekly-averages")
+    public Map<String, Double> getSentenceCorrectionWeeklyAverages(@RequestParam UUID childId) {
+        LocalDate today = LocalDate.now();
+        // Find the most recent Saturday (or today if today is Saturday)
+        LocalDate thisSaturday = today.with(java.time.DayOfWeek.SATURDAY);
+        if (today.getDayOfWeek() != java.time.DayOfWeek.SATURDAY && today.isBefore(thisSaturday)) {
+            thisSaturday = thisSaturday.minusWeeks(1);
+        }
+        LocalDate nextSaturday = thisSaturday.plusWeeks(1);
+        LocalDate lastSaturday = thisSaturday.minusWeeks(1);
+        LocalDateTime thisWeekStart = thisSaturday.atStartOfDay();
+        LocalDateTime nextWeekStart = nextSaturday.atStartOfDay();
+        LocalDateTime lastWeekStart = lastSaturday.atStartOfDay();
+        LocalDateTime thisWeekEnd = nextWeekStart.minusSeconds(1);
+        LocalDateTime lastWeekEnd = thisWeekStart.minusSeconds(1);
+        var thisWeek = sentenceCorrectionRepository.findByChildIdAndAttemptedAtBetween(childId, thisWeekStart, thisWeekEnd);
+        var lastWeek = sentenceCorrectionRepository.findByChildIdAndAttemptedAtBetween(childId, lastWeekStart, lastWeekEnd);
+        double thisWeekAvg = thisWeek.isEmpty() ? 0.0 : thisWeek.stream().mapToInt(e -> e.getScore()).average().orElse(0.0);
+        double lastWeekAvg = lastWeek.isEmpty() ? 0.0 : lastWeek.stream().mapToInt(e -> e.getScore()).average().orElse(0.0);
+        Map<String, Double> result = new HashMap<>();
+        result.put("thisWeek", thisWeekAvg);
+        result.put("lastWeek", lastWeekAvg);
+        return result;
     }
 }
 

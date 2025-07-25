@@ -206,7 +206,7 @@ const WordMatching: React.FC = () => {
                   y1={from.y}
                   x2={to.x}
                   y2={to.y}
-                  stroke="blue"
+                  stroke="orange"
                   strokeWidth={2}
                 />
               );

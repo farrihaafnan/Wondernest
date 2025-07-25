@@ -82,6 +82,19 @@ public class ScreenTimeController {
     }
 
     /**
+     * Get average screen time per day for each activity for this week and last week (Sat-Fri)
+     */
+    @GetMapping("/weekly-activity/{childId}")
+    public ResponseEntity<?> getWeeklyActivityAverages(@PathVariable UUID childId) {
+        try {
+            return ResponseEntity.ok(screenTimeService.getWeeklyActivityAverages(childId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Failed to fetch weekly activity averages");
+        }
+    }
+
+    /**
      * Manually trigger cleanup of old screen time logs (for testing)
      */
     @PostMapping("/cleanup")
