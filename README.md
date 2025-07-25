@@ -22,7 +22,7 @@ WonderNest is an interactive, AI-powered educational platform designed for child
 - Containerization: Docker
 - CI/CD: GitHub Actions
 
-## Project Structure
+## Project Structure 
 
 ```
 CSE408/
