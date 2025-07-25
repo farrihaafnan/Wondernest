@@ -276,7 +276,7 @@ const ChildProgress: React.FC = () => {
                 </Box>
               ) : <Typography>No word matching data.</Typography>}
               {/* Sentence Correction */}
-              <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Sentence Correction (Score per Test (Out of 5))</Typography>
+              <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>Sentence Correction (Score per Test ( Out of 5))</Typography>
               {sentenceCorrectionScores ? (
                 <Box sx={{ mb: 2 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
