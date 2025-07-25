@@ -53,6 +53,14 @@ public class SentenceEvaluationController {
     public List<String> getIncorrectSentences(@RequestParam(defaultValue = "5") int count) {
         return geminiService.generateIncorrectSentences(count);
     }
+
+    //sentence-correction
+    @GetMapping("/sentence-correction/by-child")
+    public List<SentenceCorrection> getSentenceCorrectionResultsByChild(@RequestParam UUID childId) {
+        return sentenceCorrectionRepository.findAll().stream()
+            .filter(r -> r.getChildId().equals(childId))
+            .toList();
+    }
 //sentence-correction
     @GetMapping("/sentence-correction")
     public List<SentenceCorrectionDTO> getAllSentenceCorrections() {
